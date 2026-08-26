@@ -1,0 +1,179 @@
+/* @import must come before @tailwind */
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,400;1,500&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,400&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --font-cormorant: 'Cormorant Garamond', Georgia, serif;
+  --font-dm-sans:   'DM Sans', system-ui, sans-serif;
+  --accent:         #8B5A1A;
+  --accent-light:   #C4872C;
+}
+
+@layer base {
+  *, *::before, *::after { box-sizing: border-box; margin: 0; }
+  html { scroll-behavior: smooth; -webkit-text-size-adjust: 100%; }
+  body {
+    font-family: var(--font-dm-sans), system-ui, sans-serif;
+    background: #FFFFFF;
+    color: #0C0C0C;
+    font-weight: 500;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+  }
+  ::selection { background: #0066FF; color: #FFFFFF; }
+  ::-webkit-scrollbar       { width: 4px; height: 4px; }
+  ::-webkit-scrollbar-track  { background: #F0F0F0; }
+  ::-webkit-scrollbar-thumb  { background: #C0C4C8; border-radius: 4px; }
+  ::-webkit-scrollbar-thumb:hover { background: #9AA0A6; }
+  *:focus-visible { outline: 2px solid #8B5A1A; outline-offset: 2px; border-radius: 4px; }
+  img { image-rendering: -webkit-optimize-contrast; }
+
+  /* Bolder type across the site */
+  h1, h2, h3, h4, h5, h6 { font-weight: 700; }
+  strong, b { font-weight: 700; }
+
+  /* Cormorant Garamond ships italic cuts — never let them render italic */
+  .font-display, [class*="font-display"] { font-style: normal !important; }
+  em, i { font-style: normal; }
+}
+
+@layer components {
+
+  /* ── Typography ───────────────────────────── */
+  .overline {
+    font-family: var(--font-dm-sans);
+    font-size: 0.6875rem;
+    font-weight: 600;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+  }
+  .section-label {
+    font-family: var(--font-dm-sans);
+    font-size: 0.6875rem;
+    font-weight: 600;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: #8B5A1A;
+  }
+
+  /* ── Buttons ──────────────────────────────── */
+  .btn {
+    @apply inline-flex items-center justify-center gap-2 font-sans font-medium text-sm
+           transition-all duration-200 active:scale-[0.97] select-none cursor-pointer;
+  }
+  .btn-dark {
+    @apply btn px-7 py-3.5 rounded-full bg-ink text-cream hover:bg-ink-soft;
+  }
+  .btn-cream {
+    @apply btn px-7 py-3.5 rounded-full bg-cream text-ink hover:bg-cream-warm border border-cream-warm;
+  }
+  .btn-accent {
+    @apply btn px-7 py-3.5 rounded-full text-white;
+    background: #8B5A1A;
+  }
+  .btn-accent:hover { background: #A36820; }
+
+  /* Keep btn-forest as alias */
+  .btn-forest { @apply btn-accent; }
+
+  .btn-outline-cream {
+    @apply btn px-7 py-3.5 rounded-full border text-cream;
+    border-color: rgba(245,240,232,0.22);
+  }
+  .btn-outline-cream:hover {
+    background-color: rgba(245,240,232,0.09);
+    border-color: rgba(245,240,232,0.38);
+  }
+
+  /* ── Prices — bright blue, bold, never italic ── */
+  .price {
+    font-family: var(--font-dm-sans), system-ui, sans-serif !important;
+    color: #0066FF !important;
+    font-weight: 700 !important;
+    font-style: normal !important;
+    font-variant-numeric: tabular-nums;
+    letter-spacing: -0.01em;
+  }
+  .price-sm, .price-md, .price-lg, .price-xl {
+    font-family: var(--font-dm-sans), system-ui, sans-serif !important;
+    color: #0066FF !important;
+    font-weight: 700 !important;
+    font-style: normal !important;
+    font-variant-numeric: tabular-nums;
+    letter-spacing: -0.01em;
+  }
+  .price-sm { font-size: 0.9375rem; }
+  .price-md { font-size: 1.125rem;  }
+  .price-lg { font-size: 1.5rem;    }
+  .price-xl { font-size: 2rem;      }
+  .price-was {
+    color: #9AA0A6 !important;
+    font-weight: 500;
+    font-style: normal !important;
+    text-decoration: line-through;
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* ── Cards ────────────────────────────────── */
+  .card {
+    @apply bg-white rounded-2xl overflow-hidden transition-all duration-300
+           hover:shadow-[0_12px_48px_rgba(0,0,0,0.10)] hover:-translate-y-0.5;
+    border: 1px solid #E8E8E8;
+  }
+
+  /* ── Skeleton ─────────────────────────────── */
+  .skeleton {
+    background: linear-gradient(90deg, #F0F0F0 25%, #E6E6E6 50%, #F0F0F0 75%);
+    background-size: 200% 100%;
+    animation: shimmer 1.8s ease-in-out infinite;
+    border-radius: 8px;
+  }
+
+  /* ── Inputs ───────────────────────────────── */
+  .input {
+    @apply w-full px-4 py-3 rounded-xl border border-cream-warm bg-white text-sm text-ink
+           placeholder-cream-muted transition-all duration-200
+           focus:outline-none focus:ring-2;
+    --tw-ring-color: rgba(139,90,26,0.15);
+  }
+  .input:focus { border-color: #8B5A1A; }
+
+  .input-dark {
+    @apply w-full px-5 py-3.5 rounded-full border text-sm text-cream
+           placeholder-cream/25 transition-all duration-200 focus:outline-none bg-transparent;
+    border-color: rgba(245,240,232,0.14);
+  }
+  .input-dark:focus { border-color: #8B5A1A; box-shadow: 0 0 0 3px rgba(139,90,26,0.18); }
+
+  /* ── Badges ───────────────────────────────── */
+  .badge-sale { @apply absolute top-3 left-3 px-2.5 py-1 rounded-full text-[10px] font-bold tracking-wide bg-red-600 text-white; }
+  .badge-new  { @apply absolute top-3 left-3 px-2.5 py-1 rounded-full text-[10px] font-bold tracking-wide text-white; background: #8B5A1A; }
+}
+
+@layer utilities {
+  .hide-scrollbar { scrollbar-width: none; -ms-overflow-style: none; }
+  .hide-scrollbar::-webkit-scrollbar { display: none; }
+  .text-balance { text-wrap: balance; }
+  .dot-grid {
+    background-image: radial-gradient(circle at 1px 1px, rgba(245,240,232,0.045) 1px, transparent 0);
+    background-size: 28px 28px;
+  }
+  .dot-grid-light {
+    background-image: radial-gradient(circle at 1px 1px, rgba(12,12,12,0.05) 1px, transparent 0);
+    background-size: 28px 28px;
+  }
+}
+
+/* ── Animations ───────────────────────────────── */
+@keyframes shimmer  { 0% { background-position: -200% 0; } 100% { background-position: 200% 0; } }
+@keyframes fade-up  { from { opacity: 0; transform: translateY(24px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes fade-in  { from { opacity: 0; } to { opacity: 1; } }
+@keyframes scale-in { from { opacity: 0; transform: scale(0.96) translateY(-4px); } to { opacity: 1; transform: scale(1) translateY(0); } }
+
+/* ── Product image zoom ───────────────────────── */
+.prod-img { transition: transform 0.55s cubic-bezier(0.25,0.46,0.45,0.94); }
+.group:hover .prod-img { transform: scale(1.07); }
