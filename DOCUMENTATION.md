@@ -145,7 +145,7 @@ graph TD
 
 | File | Exports | Description |
 | :--- | :--- | :--- |
-| `lib/cloudinary.ts` | `listProducts`, `getProductBySku`, `getProductBySlug`, `createProduct`, `updateProductImage`, `updateProductContext`, `deleteProduct`, `listHeroImages`, `uploadHeroImage`, `deleteHeroImage` | The central data access layer. Communicates with Cloudinary REST API, signs requests via SHA-1 crypto hashes, serializes product fields into pipe-delimited strings, and parses Cloudinary responses into typed product objects. Includes automatic transition from demo fallback to live cloud catalog. |
+| `lib/cloudinary.ts` | `listProducts`, `getProductBySku`, `getProductBySlug`, `createProduct`, `updateProductImage`, `updateProductContext`, `deleteProduct`, `listHeroImages`, `uploadHeroImage`, `deleteHeroImage` | The central data access layer. Communicates with Cloudinary REST API, signs requests via SHA-1 crypto hashes, serializes product fields into pipe-delimited strings, and parses Cloudinary responses into typed product objects. Directly pulls 100% live assets from your Cloudinary storage. |
 | `lib/search.ts` | `scoreProduct`, `rankBySearch`, `norm` | Pure search ranking module. Evaluates query terms against product names, SKUs, brands, and descriptions using multi-tier scoring and AND-conjunction rules. |
 | `lib/format.ts` | `formatPrice`, `formatDate`, `formatPhone`, `truncate`, `slugify` | Utility functions for formatting Kenyan Shillings (`KES`), Kenyan phone numbers (`+254`), dates, and URL slugs. |
 
@@ -203,9 +203,9 @@ Authenticated via password: `Smartech.ke@2026`
    - **Instant Toggles**: One-click toggles for "Featured" (homepage spotlight) and "Active" (hide/show item without deleting).
 6. **🖼 Hero Images**: Manage homepage carousel banners stored in `smartech-hero/*`.
 
-### B. Catalog Lifecycle (Demo Fallback -> Live Cloudinary)
-1. **Initial Zero-State**: If your Cloudinary cloud is fresh and empty, the system displays 8 built-in sample Kenyan appliances so the UI is fully testable.
-2. **Automatic Live Handover**: The instant you upload your first real product to Cloudinary, the system detects `products.length > 0` and **completely replaces all sample products** with your genuine showroom catalog.
+### B. Catalog Lifecycle (100% Live Cloudinary Store)
+1. **Clean Zero-State**: If your Cloudinary cloud is fresh and empty, the catalog displays 0 products ("No products found yet").
+2. **Pure Live Catalog**: Every product, photo, price, and description shown to customers comes 100% exclusively from your live Cloudinary account (`gh5pkvfh`) in `smartech-products/*`. No sample products or Unsplash images will ever appear.
 
 ### C. Customer Search & Discovery Flow
 ```
