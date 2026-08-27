@@ -66,7 +66,7 @@ export async function ProductList({ searchParams }: { searchParams: SearchParams
         </p>
       </div>
 
-      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 mb-8">
+      <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 2xl:grid-cols-5 gap-3 sm:gap-4 lg:gap-5 mb-8">
         {products.map((p: any) => <ProductCard key={p.id} product={p}/>)}
       </div>
 

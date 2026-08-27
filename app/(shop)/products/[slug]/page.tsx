@@ -50,7 +50,7 @@ export default async function ProductDetailPage({ params }: Props) {
 
       {/* Breadcrumb */}
       <div className="border-b border-cream-warm/60 bg-cream">
-        <div className="max-w-[1320px] mx-auto px-6 py-3.5 flex items-center gap-2 text-xs text-ink/40 flex-wrap">
+        <div className="max-w-[1440px] 2xl:max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8 py-3.5 flex items-center gap-2 text-xs text-ink/40 flex-wrap">
           <Link href="/"          className="hover:text-ink/70 transition-colors">Home</Link>
           <span>/</span>
           <Link href="/products"  className="hover:text-ink/70 transition-colors">Products</Link>
@@ -64,17 +64,17 @@ export default async function ProductDetailPage({ params }: Props) {
         </div>
       </div>
 
-      <div className="max-w-[1320px] mx-auto px-6 py-10 lg:py-14">
-        <div className="grid lg:grid-cols-2 gap-10 lg:gap-16 items-start">
+      <div className="max-w-[1440px] 2xl:max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-10 lg:py-14">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-14 xl:gap-18 items-start">
 
           {/* ── Image ── */}
-          <div className="rounded-2xl overflow-hidden border border-cream-warm bg-white"
+          <div className="w-full max-w-md mx-auto lg:max-w-none rounded-2xl overflow-hidden border border-cream-warm bg-white shadow-sm"
             style={{ aspectRatio: '1 / 1', position: 'relative' }}>
             {product.images[0] ? (
               <Image
                 src={product.images[0]} alt={product.name} fill
                 sizes="(max-width: 1024px) 100vw, 50vw"
-                className="object-contain p-8"
+                className="object-contain p-6 sm:p-8"
                 priority
               />
             ) : (
@@ -86,7 +86,7 @@ export default async function ProductDetailPage({ params }: Props) {
               </div>
             )}
             {discount && (
-              <div className="absolute top-4 left-4 px-2.5 py-1 rounded-full text-[10px] font-bold tracking-wide bg-[#C0392B] text-white">
+              <div className="absolute top-4 left-4 px-2.5 py-1 rounded-full text-[10px] font-bold tracking-wide bg-[#C0392B] text-white shadow-sm">
                 -{discount}%
               </div>
             )}
@@ -107,25 +107,25 @@ export default async function ProductDetailPage({ params }: Props) {
               </Link>
             </div>
 
-            <h1 className="font-display text-ink mb-5 leading-tight"
-              style={{ fontSize: 'clamp(1.7rem, 3vw, 2.6rem)', fontWeight: 400 }}>
+            <h1 className="font-display text-ink mb-4 sm:mb-5 leading-tight"
+              style={{ fontSize: 'clamp(1.7rem, 3.2vw, 2.7rem)', fontWeight: 600 }}>
               {product.name}
             </h1>
 
             {/* Price */}
             <div className="flex items-baseline gap-3 mb-6">
-              <span className="price" style={{ fontSize: '1.875rem' }}>
+              <span className="price" style={{ fontSize: 'clamp(1.5rem, 2.5vw, 2rem)' }}>
                 KES {product.price.toLocaleString()}
               </span>
               {product.comparePrice && product.comparePrice > product.price && (
-                <span className="price-was text-base">
+                <span className="price-was text-sm sm:text-base">
                   KES {product.comparePrice.toLocaleString()}
                 </span>
               )}
             </div>
 
             {product.description && (
-              <ul className="text-sm leading-relaxed text-ink/65 mb-7 max-w-[480px] list-disc list-inside space-y-1.5">
+              <ul className="text-xs sm:text-sm leading-relaxed text-ink/70 mb-7 max-w-[540px] list-disc list-inside space-y-1.5">
                 {product.description
                   .split(/\n|(?<=\.)\s+/)
                   .map((s: string) => s.trim())
@@ -141,14 +141,14 @@ export default async function ProductDetailPage({ params }: Props) {
               {product.stock > 0 ? (
                 <>
                   <span className="w-2 h-2 rounded-full bg-emerald-500"/>
-                  <span className="text-xs font-medium text-ink/60">
+                  <span className="text-xs font-medium text-ink/70">
                     {product.stock > 10 ? 'In Stock' : `Only ${product.stock} left`}
                   </span>
                 </>
               ) : (
                 <>
                   <span className="w-2 h-2 rounded-full bg-red-400"/>
-                  <span className="text-xs font-medium text-ink/60">Out of Stock</span>
+                  <span className="text-xs font-medium text-ink/70">Out of Stock</span>
                 </>
               )}
             </div>
@@ -157,10 +157,10 @@ export default async function ProductDetailPage({ params }: Props) {
             <div className="flex flex-col sm:flex-row gap-3 mb-8">
               <a href={`https://wa.me/${WA}?text=${waMsg}`}
                 target="_blank" rel="noopener noreferrer"
-                className="btn flex-1 flex items-center justify-center gap-2.5 px-7 py-4 rounded-full text-sm font-semibold shadow-lg"
+                className="btn flex-1 flex items-center justify-center gap-2.5 px-6 sm:px-7 py-3.5 sm:py-4 rounded-full text-sm font-semibold shadow-lg"
                 style={{ background: '#25D366', color: '#fff' }}>
                 <svg className="w-4 h-4 shrink-0" viewBox="0 0 24 24" fill="currentColor">
-                  <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347"/>
+                  <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
                 </svg>
                 Order on WhatsApp
               </a>
@@ -174,16 +174,16 @@ export default async function ProductDetailPage({ params }: Props) {
             </div>
 
             {/* Trust */}
-            <div className="pt-6 border-t border-cream-warm/60 grid grid-cols-3 gap-4 text-center">
+            <div className="pt-6 border-t border-cream-warm/60 grid grid-cols-3 gap-3 sm:gap-4 text-center">
               {[
                 { icon: '🚚', label: 'Fast Delivery',    sub: 'Nairobi same-day'   },
                 { icon: '✓',  label: '100% Genuine',     sub: 'Authorised dealer'  },
                 { icon: '💬', label: 'WhatsApp Support', sub: '+254 746 722 417'   },
               ].map(b => (
-                <div key={b.label}>
-                  <div className="text-lg mb-1">{b.icon}</div>
-                  <p className="text-[10px] font-semibold text-ink">{b.label}</p>
-                  <p className="text-[9px] text-ink/45">{b.sub}</p>
+                <div key={b.label} className="p-2 sm:p-3 rounded-xl bg-white/60">
+                  <div className="text-lg sm:text-xl mb-1">{b.icon}</div>
+                  <p className="text-[10px] sm:text-[11px] font-semibold text-ink">{b.label}</p>
+                  <p className="text-[9px] sm:text-[10px] text-ink/45">{b.sub}</p>
                 </div>
               ))}
             </div>
@@ -192,25 +192,25 @@ export default async function ProductDetailPage({ params }: Props) {
 
         {/* Related products */}
         {related.length > 0 && (
-          <section className="mt-20">
-            <div className="flex items-end justify-between mb-8">
+          <section className="mt-14 sm:mt-20">
+            <div className="flex items-end justify-between mb-6 sm:mb-8">
               <div>
-                <p className="text-[9.5px] font-bold tracking-[0.16em] uppercase mb-2" style={{ color: '#8B5A1A' }}>
+                <p className="text-[9.5px] font-bold tracking-[0.16em] uppercase mb-1.5" style={{ color: '#8B5A1A' }}>
                   You may also like
                 </p>
-                <h2 className="font-display text-ink" style={{ fontSize: 'clamp(1.4rem,2.5vw,2rem)', fontWeight: 400 }}>
+                <h2 className="font-display text-ink" style={{ fontSize: 'clamp(1.4rem,2.5vw,2rem)', fontWeight: 600 }}>
                   Related Products
                 </h2>
               </div>
               <Link href={`/products?category=${product.category}`}
-                className="hidden sm:inline-flex items-center gap-1.5 text-xs font-semibold text-ink/45 hover:text-ink transition-colors">
+                className="inline-flex items-center gap-1.5 text-xs sm:text-sm font-semibold text-ink/50 hover:text-ink transition-colors">
                 View all
                 <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3"/>
                 </svg>
               </Link>
             </div>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4">
               {related.map(p => (
                 <Link key={p.id} href={`/products/${encodeURIComponent(p.sku)}`}
                   className="group rounded-2xl overflow-hidden border border-cream-warm bg-white hover:shadow-md transition-all duration-200">

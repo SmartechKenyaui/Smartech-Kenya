@@ -6,6 +6,7 @@ import Image          from 'next/image';
 import { usePathname } from 'next/navigation';
 import { useSelector } from 'react-redux';
 import { RootState }  from '@/store';
+import { LiveSearchBar } from '@/components/search/LiveSearchBar';
 
 const NAV = [
   { label: 'Fridges',          href: '/products?category=KITCHEN&subcategory=fridges'          },
@@ -23,9 +24,9 @@ function CustomerCareButton() {
   return (
     <>
       <button onClick={() => setOpen(v => !v)} aria-label="Customer Care"
-        className="fixed bottom-6 left-6 z-[60] w-14 h-14 rounded-full flex items-center justify-center shadow-xl transition-transform hover:scale-105 active:scale-95"
+        className="fixed bottom-5 left-5 sm:bottom-6 sm:left-6 z-[60] w-12 h-12 sm:w-14 sm:h-14 rounded-full flex items-center justify-center shadow-xl transition-transform hover:scale-105 active:scale-95"
         style={{ background: '#F97316', boxShadow: '0 4px 24px rgba(249,115,22,0.45)' }}>
-        <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <svg className="w-5 h-5 sm:w-6 sm:h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
             d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"/>
         </svg>
@@ -33,7 +34,7 @@ function CustomerCareButton() {
       {open && (
         <>
           <div className="fixed inset-0 z-[59]" onClick={() => setOpen(false)}/>
-          <div className="fixed bottom-24 left-6 z-[60] w-72 bg-white rounded-2xl shadow-2xl overflow-hidden">
+          <div className="fixed bottom-20 sm:bottom-24 left-4 sm:left-6 z-[60] w-[calc(100vw-2rem)] sm:w-80 bg-white rounded-2xl shadow-2xl overflow-hidden border border-gray-100 animate-fade-up">
             <div className="px-5 py-4 flex items-center justify-between" style={{ background: '#F97316' }}>
               <div className="flex items-center gap-3">
                 <div className="w-9 h-9 rounded-full bg-white/20 flex items-center justify-center">
@@ -47,7 +48,7 @@ function CustomerCareButton() {
                   <p className="text-white/75 text-[11px]">Smartech Kenya</p>
                 </div>
               </div>
-              <button onClick={() => setOpen(false)} className="text-white/70 hover:text-white transition-colors">
+              <button onClick={() => setOpen(false)} className="text-white/70 hover:text-white transition-colors p-1">
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12"/>
                 </svg>
@@ -81,6 +82,7 @@ export function Header() {
 
   useEffect(() => { setMobileOpen(false); }, [pathname]);
   useEffect(() => { if (searchOpen) setTimeout(() => searchRef.current?.focus(), 50); }, [searchOpen]);
+
   useEffect(() => {
     const fn = (e: KeyboardEvent) => {
       if (e.key === 'Escape') { setSearchOpen(false); setMobileOpen(false); }
@@ -89,20 +91,24 @@ export function Header() {
     return () => window.removeEventListener('keydown', fn);
   }, []);
 
+  if (pathname?.startsWith('/admin')) {
+    return null;
+  }
+
   return (
     <>
       {/* ── TOP INFO BAR ────────────────────────────────────────────────── */}
-      <div className="bg-gray-50 border-b border-gray-200 text-[11px] text-gray-500 py-1.5 px-4">
-        <div className="max-w-[1320px] mx-auto flex items-center justify-between flex-wrap gap-x-4 gap-y-0.5">
-          <div className="flex items-center gap-1.5">
+      <div className="bg-gray-50 border-b border-gray-200 text-[11px] text-gray-500 py-1.5 px-4 sm:px-6">
+        <div className="max-w-[1440px] 2xl:max-w-[1600px] mx-auto flex items-center justify-between flex-wrap gap-x-4 gap-y-1">
+          <div className="flex items-center gap-1.5 text-[10.5px] sm:text-[11px]">
             <svg className="w-3 h-3 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" style={{color:'#F97316'}}>
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
             </svg>
-            <span>Gaberone Plaza, 4th Floor, Shop A13 — Nairobi</span>
+            <span className="truncate">Gaberone Plaza, 4th Floor, Shop A13 — Nairobi</span>
           </div>
-          <div className="flex items-center gap-5">
-            <span>Mon–Sat 8am–7pm</span>
+          <div className="flex items-center gap-4 sm:gap-6 text-[10.5px] sm:text-[11px] ml-auto">
+            <span className="hidden xs:inline sm:inline">Mon–Sat 8am–7pm</span>
             <a href="tel:+254746722417"
               className="flex items-center gap-1.5 font-semibold hover:opacity-75 transition-opacity"
               style={{color:'#F97316'}}>
@@ -121,27 +127,17 @@ export function Header() {
       {/* ── MAIN HEADER — always solid white ───────────────────────────── */}
       <header className="sticky top-0 z-50 bg-white border-b border-gray-100 shadow-[0_1px_12px_rgba(0,0,0,0.06)]">
 
-        <div className="max-w-[1320px] mx-auto px-5 flex items-center gap-4 h-[62px]">
+        <div className="max-w-[1440px] 2xl:max-w-[1600px] mx-auto px-4 sm:px-6 flex items-center gap-3 sm:gap-4 h-[60px] sm:h-[64px]">
 
           {/* Logo */}
           <Link href="/" className="shrink-0 flex items-center">
             <Image src="/logo.png" alt="Smartech Kenya" width={140} height={40} priority
-              className="object-contain h-9 w-auto"/>
+              className="object-contain h-8 sm:h-9 w-auto"/>
           </Link>
 
           {/* Desktop search */}
-          <div className="hidden md:flex flex-1 max-w-lg mx-auto">
-            <form action="/products" method="GET" className="relative w-full">
-              <svg className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none"
-                fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5}
-                  d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
-              </svg>
-              <input type="text" name="search" placeholder="Search products, brands…"
-                className="w-full pl-10 pr-4 py-2.5 rounded-full text-sm bg-gray-100 border border-gray-200
-                           text-gray-800 placeholder-gray-400 focus:bg-white focus:border-orange-300
-                           focus:shadow-sm outline-none transition-all duration-200"/>
-            </form>
+          <div className="hidden md:flex flex-1 max-w-xl mx-auto px-2">
+            <LiveSearchBar />
           </div>
 
           {/* Right actions */}
@@ -198,43 +194,41 @@ export function Header() {
         </div>
 
         {/* Desktop category strip */}
-        <div className="hidden lg:block border-t border-gray-100">
-          <div className="max-w-[1320px] mx-auto px-5 flex items-center overflow-x-auto hide-scrollbar">
-            {NAV.map(n => (
-              <Link key={n.href} href={n.href}
-                className="flex-shrink-0 px-4 py-2.5 text-[11.5px] font-semibold tracking-wide whitespace-nowrap
-                           transition-all text-gray-500 hover:text-gray-900 relative
-                           after:absolute after:bottom-0 after:left-0 after:right-0 after:h-[2px]
-                           after:bg-transparent after:transition-colors
-                           hover:after:bg-gray-400">
-                {n.label}
+        <div className="hidden lg:block border-t border-gray-100 bg-white/95 backdrop-blur-sm">
+          <div className="max-w-[1440px] 2xl:max-w-[1600px] mx-auto px-6 py-2 flex items-center justify-between gap-4">
+            <div className="flex items-center gap-2 overflow-x-auto hide-scrollbar flex-1">
+              {NAV.map(n => (
+                <Link
+                  key={n.href}
+                  href={n.href}
+                  className="flex-shrink-0 px-3.5 py-1.5 rounded-full text-[12px] font-semibold text-gray-600 hover:text-gray-950 hover:bg-gray-100 transition-all duration-200"
+                >
+                  {n.label}
+                </Link>
+              ))}
+            </div>
+
+            <div className="flex items-center gap-3 shrink-0 pl-2">
+              <div className="h-4 w-px bg-gray-200" />
+              <Link
+                href="/products?isFeatured=true"
+                className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-[12px] font-bold text-orange-600 bg-orange-50 hover:bg-orange-100 border border-orange-200/70 transition-all duration-200"
+              >
+                <span>🔥</span>
+                <span>Special Offers</span>
               </Link>
-            ))}
-            <div className="flex-1"/>
-            <Link href="/products?isFeatured=true"
-              className="flex-shrink-0 px-4 py-2.5 text-[11.5px] font-bold tracking-wide transition-all
-                         border-b-2 border-transparent text-orange-500 hover:text-orange-600 hover:border-orange-400">
-              🔥 Deals
-            </Link>
+            </div>
           </div>
         </div>
       </header>
 
       {/* Mobile search overlay */}
       {searchOpen && (
-        <div className="fixed inset-0 z-[55] flex items-start justify-center pt-[100px] px-4 md:hidden"
+        <div className="fixed inset-0 z-[55] flex items-start justify-center pt-[90px] px-4 md:hidden"
           onClick={() => setSearchOpen(false)}>
           <div className="absolute inset-0 bg-black/60 backdrop-blur-md"/>
-          <div className="relative w-full max-w-md" onClick={e => e.stopPropagation()}>
-            <form action="/products" method="GET" className="flex items-center gap-3 bg-white rounded-2xl shadow-2xl px-5 py-4">
-              <svg className="w-5 h-5 text-gray-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5}
-                  d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
-              </svg>
-              <input ref={searchRef} type="text" name="search"
-                placeholder="Search products, brands…"
-                className="flex-1 text-gray-800 text-base outline-none placeholder-gray-400 bg-transparent"/>
-            </form>
+          <div className="relative w-full max-w-md bg-white p-3 rounded-2xl shadow-2xl" onClick={e => e.stopPropagation()}>
+            <LiveSearchBar autoFocus isMobileModal onClose={() => setSearchOpen(false)} />
           </div>
         </div>
       )}
@@ -247,23 +241,14 @@ export function Header() {
                           overflow-y-auto max-h-[calc(100vh-92px)]"
             onClick={e => e.stopPropagation()}>
             <div className="px-5 py-3 border-b border-gray-100">
-              <form action="/products" method="GET" className="relative">
-                <svg className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none"
-                  fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5}
-                    d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
-                </svg>
-                <input type="text" name="search"
-                  placeholder="Search products…"
-                  className="w-full pl-9 pr-4 py-2.5 rounded-xl bg-gray-100 text-sm text-gray-800 placeholder-gray-400 outline-none"/>
-              </form>
+              <LiveSearchBar placeholder="Search products, brands…" onClose={() => setMobileOpen(false)} />
             </div>
             <div className="py-2">
               {NAV.map(n => (
                 <Link key={n.href} href={n.href} onClick={() => setMobileOpen(false)}
                   className="flex items-center justify-between px-5 py-3.5 text-sm font-semibold text-gray-700
                              hover:bg-gray-50 transition-colors border-b border-gray-100 last:border-0">
-                  {n.label}
+                  <span>{n.label}</span>
                   <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 5l7 7-7 7"/>
                   </svg>

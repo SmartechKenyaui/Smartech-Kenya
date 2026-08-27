@@ -1,6 +1,7 @@
 'use client';
 
-import { useState, useRef, useCallback } from 'react';
+import { useState, useRef, useCallback, useEffect } from 'react';
+import { ImageCropperModal } from '@/components/admin/ImageCropperModal';
 
 /* ── Types ── */
 interface Product {
@@ -32,31 +33,85 @@ const CATEGORIES = [
 ];
 
 const BRANDS = [
+  'Acer',
+  'Alcatel',
+  'Anker',
+  'Apple',
+  'Ariston',
+  'Asus',
   'Beko',
+  'Belkin',
+  'Black+Decker',
   'Bolesi',
+  'Bosch',
+  'Bose',
+  'Brother',
   'Bruhm',
+  'Candy',
+  'Canon',
+  'D-Link',
+  'Defy',
+  'Dell',
+  'EcoMax',
+  'Electrolux',
+  'Epson',
+  'Geepas',
+  'Google',
   'Haier',
+  'Harman Kardon',
   'Hisense',
+  'Honor',
+  'Hotpoint',
   'HP',
+  'Huawei',
   'Infinix',
   'itel',
   'JBL',
+  'JVC',
+  'Kenwood',
+  'Lenovo',
   'LG',
+  'Marshall',
+  'Midea',
   'Mika',
+  'Microsoft',
   'Motorola',
+  'Moulinex',
+  'MSI',
+  'Nikai',
+  'Nikon',
   'Nokia',
   'Nunix',
+  'OnePlus',
+  'Oppo',
+  'Panasonic',
+  'Philips',
+  'POCO',
   'Ramtons',
   'Rashnik',
+  'Realme',
+  'Redmi',
   'Roch',
+  'Russell Hobbs',
   'Samsung',
+  'Scanfrost',
+  'Sharp',
+  'Skyworth',
   'SmartPro',
   'Sony',
-  'EcoMax',
   'TCL',
   'Tecno',
+  'Tefal',
+  'Tenda',
+  'Toshiba',
+  'TP-Link',
+  'Ubiquiti',
   'Vitron',
+  'Vivo',
   'Von Hotpoint',
+  'Whirlpool',
+  'Xiaomi',
+  'ZTE',
   'Other',
 ];
 
@@ -96,261 +151,291 @@ export default function AdminPage() {
   const [dbError,  setDbError]  = useState('');
   const [loading,  setLoading]  = useState(false);
   const [error,    setError]    = useState('');
-  const [tab,      setTab]      = useState<'images'|'folder'|'direct'|'add'|'manage'|'hero'>('add');
+  const [tab,         setTab]         = useState<'manage'|'add'|'images'|'folder'>('manage');
+  const [sidebarOpen, setSidebarOpen] = useState(true);
 
-  /* Login: auth via DB-free endpoint, then try to load products */
-  const login = async () => {
-    setLoading(true); setError('');
+  // Fast session restore from session storage (preserves login on page refresh)
+  useEffect(() => {
     try {
-      /* Step 1 — verify secret (no MongoDB) */
-      const authRes = await fetch(`/api/admin/cloudinary-upload?secret=${encodeURIComponent(secret)}`);
-      if (!authRes.ok) { setError('Wrong password.'); setLoading(false); return; }
+      const saved = sessionStorage.getItem('smartech_admin_secret');
+      if (saved) {
+        setSecret(saved);
+        setAuthed(true);
+        // Load products in background asynchronously
+        fetch(`/api/admin/upload-image?secret=${encodeURIComponent(saved)}`)
+          .then(r => r.json())
+          .then(pData => {
+            if (pData.products) setProducts(pData.products);
+            if (pData.dbError) setDbError(pData.dbError);
+          })
+          .catch(() => {});
+      }
+    } catch {}
+  }, []);
 
-      /* Step 2 — try to load products (may fail if Atlas is blocked) */
-      try {
-        const pRes = await fetch(`/api/admin/upload-image?secret=${encodeURIComponent(secret)}`);
-        const pData = await pRes.json();
-        if (pData.products) setProducts(pData.products);
-        if (pData.dbError)  setDbError(pData.dbError);
-      } catch {
-        setDbError('Could not reach database — image upload still works via Direct Upload.');
+  /* Fast Login */
+  const login = async () => {
+    if (!secret.trim()) return;
+    setLoading(true);
+    setError('');
+    try {
+      const authRes = await fetch(`/api/admin/cloudinary-upload?secret=${encodeURIComponent(secret.trim())}`);
+      if (!authRes.ok) {
+        setError('Incorrect password. Please try again.');
+        setLoading(false);
+        return;
       }
 
+      // Validated! Save to sessionStorage for page refresh support
+      try { sessionStorage.setItem('smartech_admin_secret', secret.trim()); } catch {}
       setAuthed(true);
-    } catch { setError('Connection error.'); }
-    setLoading(false);
+      setLoading(false);
+
+      // Fetch products in background asynchronously without blocking login
+      fetch(`/api/admin/upload-image?secret=${encodeURIComponent(secret.trim())}`)
+        .then(r => r.json())
+        .then(pData => {
+          if (pData.products) setProducts(pData.products);
+          if (pData.dbError) setDbError(pData.dbError);
+        })
+        .catch(() => {
+          setDbError('Could not reach database — image upload still works via Direct Upload.');
+        });
+    } catch {
+      setError('Connection error. Please check your network.');
+      setLoading(false);
+    }
   };
+
+  const logout = () => {
+    try { sessionStorage.removeItem('smartech_admin_secret'); } catch {}
+    setAuthed(false);
+    setSecret('');
+  };
+
+  const handleViewLiveStore = () => {
+    window.open('/', '_blank');
+  };
+
+  const [showPassword, setShowPassword] = useState(false);
 
   /* ── Login screen ── */
   if (!authed) {
     return (
-      <div className="min-h-screen flex items-center justify-center px-4" style={{ background: '#0C0C0C' }}>
-        <div className="w-full max-w-sm">
-          <div className="text-center mb-10">
-            <div className="w-14 h-14 rounded-2xl mx-auto mb-5 flex items-center justify-center"
-              style={{ background: 'rgba(139,90,26,0.15)', border: '1px solid rgba(139,90,26,0.30)' }}>
-              <svg className="w-7 h-7" style={{ color: '#C4872C' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8}
-                  d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
-              </svg>
+      <div className="min-h-screen flex items-center justify-center px-4 relative overflow-hidden bg-[#0A0D14]">
+        {/* Ambient lighting & radial glow background */}
+        <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-[#F97316]/10 rounded-full blur-[120px] pointer-events-none" />
+        <div className="absolute bottom-10 right-10 w-[300px] h-[300px] bg-blue-500/5 rounded-full blur-[100px] pointer-events-none" />
+
+        <div className="w-full max-w-[420px] relative z-10">
+          {/* Glassmorphic Card */}
+          <div className="bg-[#121722]/80 backdrop-blur-xl border border-white/[0.08] rounded-3xl p-8 sm:p-10 shadow-2xl shadow-black/60">
+            {/* Logo / Badge */}
+            <div className="text-center mb-8">
+              <div className="w-16 h-16 mx-auto mb-4 flex items-center justify-center">
+                <img
+                  src="/admin-icon.jpeg"
+                  alt="Smartech Kenya Admin"
+                  className="w-16 h-16 rounded-2xl object-cover shadow-xl border border-white/20 ring-4 ring-[#F97316]/20"
+                />
+              </div>
+              <h1 className="text-white text-2xl font-bold tracking-tight">Admin Portal</h1>
             </div>
-            <h1 className="text-white text-2xl font-semibold tracking-tight">Admin Panel</h1>
-            <p className="text-sm mt-1.5" style={{ color: 'rgba(255,255,255,0.35)' }}>Smartech Kenya</p>
-          </div>
-          <div className="space-y-3">
-            <input type="password" value={secret} onChange={e => setSecret(e.target.value)}
-              placeholder="Admin password"
-              onKeyDown={e => e.key === 'Enter' && login()}
-              className="w-full px-4 py-3.5 rounded-xl text-sm focus:outline-none"
-              style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.12)', color: '#FFFFFF' }}/>
-            {error && <p className="text-red-400 text-xs text-center">{error}</p>}
-            <button onClick={login} disabled={loading || !secret.trim()}
-              className="w-full py-3.5 rounded-xl text-sm font-bold transition-all disabled:opacity-40"
-              style={{ background: '#8B5A1A', color: '#FFFFFF' }}>
-              {loading ? 'Signing in…' : 'Sign in'}
-            </button>
-          </div>
-          <div className="mt-8 p-4 rounded-xl text-xs leading-relaxed"
-            style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', color: 'rgba(255,255,255,0.40)' }}>
-            <p className="font-semibold mb-1.5" style={{ color: 'rgba(255,255,255,0.60)' }}>Quick upload</p>
-            <p>Sign in → <strong style={{ color: 'rgba(255,255,255,0.55)' }}>Direct Upload</strong> → pick file → get Cloudinary URL instantly. Works even when database is offline.</p>
+
+            {/* Form */}
+            <div className="space-y-4">
+              <div className="space-y-1.5">
+                <label className="block text-xs font-semibold text-gray-300">Enter Your Password</label>
+                <div className="relative">
+                  <div className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none">
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z" />
+                    </svg>
+                  </div>
+                  <input
+                    type={showPassword ? 'text' : 'password'}
+                    value={secret}
+                    onChange={e => setSecret(e.target.value)}
+                    placeholder="Enter your password"
+                    onKeyDown={e => e.key === 'Enter' && login()}
+                    className="w-full pl-11 pr-11 py-3.5 rounded-2xl text-sm bg-white/[0.05] border border-white/[0.12] text-white placeholder-gray-500 focus:bg-white/[0.08] focus:border-[#F97316] focus:ring-2 focus:ring-[#F97316]/20 outline-none transition-all"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute right-3.5 top-1/2 -translate-y-1/2 p-1 text-gray-400 hover:text-white transition-colors"
+                  >
+                    {showPassword ? (
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l18 18" />
+                      </svg>
+                    ) : (
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                      </svg>
+                    )}
+                  </button>
+                </div>
+              </div>
+
+              {error && (
+                <div className="p-3 rounded-xl bg-red-500/10 border border-red-500/20 text-red-400 text-xs font-semibold text-center flex items-center justify-center gap-1.5">
+                  <svg className="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                  <span>{error}</span>
+                </div>
+              )}
+
+              <button
+                onClick={login}
+                disabled={loading || !secret.trim()}
+                className="w-full py-3.5 rounded-2xl text-sm font-bold text-white bg-[#F97316] hover:bg-[#EA580C] active:scale-[0.99] transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-[#F97316]/25 flex items-center justify-center gap-2"
+              >
+                {loading ? (
+                  <>
+                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                    <span>Verifying Credentials…</span>
+                  </>
+                ) : (
+                  <span>Sign In to Dashboard</span>
+                )}
+              </button>
+            </div>
+
           </div>
         </div>
       </div>
     );
   }
 
-  const noImage  = products.filter(p => isPlaceholder(p.images[0])).length;
-  const hasImage = products.length - noImage;
+  const NAV_ITEMS = [
+    { id: 'manage', icon: '✎',  label: 'Manage Products' },
+    { id: 'add',    icon: '＋', label: 'Add Product'     },
+    { id: 'images', icon: '🖼', label: 'Image Manager'   },
+    { id: 'folder', icon: '📁', label: 'Folder Upload'   },
+  ] as const;
 
   return (
-    <div className="min-h-screen" style={{ background: '#FFFFFF' }}>
-      {/* Header */}
-      <div className="sticky top-0 z-30" style={{ background: '#0C0C0C', borderBottom: '1px solid rgba(255,255,255,0.08)' }}>
-        <div className="max-w-5xl mx-auto px-6 h-14 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="w-6 h-6 rounded flex items-center justify-center" style={{ background: 'rgba(139,90,26,0.25)' }}>
-              <svg className="w-3.5 h-3.5" style={{ color: '#C4872C' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
-                  d="M14.7 6.3a1 1 0 000 1.4l1.6 1.6a1 1 0 001.4 0l3.77-3.77a6 6 0 01-7.94 7.94l-6.91 6.91a2.12 2.12 0 01-3-3l6.91-6.91a6 6 0 017.94-7.94l-3.76 3.76z"/>
-              </svg>
-            </div>
-            <span className="text-white font-semibold text-sm">Admin Panel</span>
-            {products.length > 0 && (
-              <span className="hidden sm:block text-xs px-2.5 py-0.5 rounded-full font-medium"
-                style={{ background: 'rgba(139,90,26,0.20)', color: '#D9A050' }}>
-                {products.length} products · {hasImage} with images · {noImage} need images
-              </span>
+    <div className="min-h-screen flex flex-col md:flex-row bg-[#F8F9FA]">
+      {/* ── LEFT SIDEBAR ────────────────────────────────────────── */}
+      <aside
+        className={`bg-[#0C0F17] text-white flex flex-col shrink-0 border-r border-white/10 md:min-h-screen md:sticky md:top-0 md:h-screen transition-all duration-300 ${
+          sidebarOpen ? 'w-full md:w-64 lg:w-72' : 'w-full md:w-20'
+        }`}
+      >
+        {/* Brand Header & Toggle */}
+        <div className="p-4 border-b border-white/10 flex items-center justify-between gap-2">
+          <div className="flex items-center gap-3 overflow-hidden">
+            <img
+              src="/admin-icon.jpeg"
+              alt="Smartech Admin"
+              className="w-10 h-10 rounded-xl object-cover border border-white/20 shadow-md ring-2 ring-[#F97316]/20 shrink-0"
+            />
+            {sidebarOpen && (
+              <div className="min-w-0">
+                <h2 className="text-sm font-bold text-white tracking-tight leading-tight truncate">Smartech Kenya</h2>
+                <p className="text-[11px] text-[#F97316] font-semibold">Admin Dashboard</p>
+              </div>
             )}
           </div>
-          <button onClick={() => setAuthed(false)}
-            className="text-xs px-3 py-1.5 rounded-lg"
-            style={{ color: 'rgba(255,255,255,0.40)', border: '1px solid rgba(255,255,255,0.10)' }}>
-            Sign out
+          <button
+            onClick={() => setSidebarOpen(!sidebarOpen)}
+            className="w-8 h-8 rounded-lg flex items-center justify-center text-white bg-white/20 hover:bg-[#F97316] border border-white/25 shadow-sm transition-all active:scale-95 shrink-0 cursor-pointer"
+            title={sidebarOpen ? "Collapse sidebar" : "Expand sidebar"}
+          >
+            <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              {sidebarOpen ? (
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M11 19l-7-7 7-7m8 14l-7-7 7-7" />
+              ) : (
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M13 5l7 7-7 7M5 5l7 7-7 7" />
+              )}
+            </svg>
           </button>
         </div>
-      </div>
 
-      {/* DB warning banner */}
-      {dbError && (
-        <div className="bg-amber-50 border-b border-amber-200 px-6 py-2.5">
-          <p className="text-xs text-amber-800 text-center max-w-5xl mx-auto">
-            ⚠ <strong>Database offline (Atlas IP whitelist).</strong> {dbError}
-          </p>
+        {/* Navigation Items (Left Side List) */}
+        <div className="flex-1 p-2.5 space-y-1.5 overflow-y-auto">
+          {sidebarOpen && (
+            <p className="px-3 py-2 text-[10px] font-bold uppercase tracking-wider text-gray-500">Navigation</p>
+          )}
+          {NAV_ITEMS.map(t => {
+            const active = tab === t.id;
+            return (
+              <button
+                key={t.id}
+                onClick={() => setTab(t.id)}
+                title={!sidebarOpen ? t.label : undefined}
+                className={`w-full text-left rounded-xl text-xs font-semibold transition-all flex items-center gap-3 ${
+                  sidebarOpen ? 'px-3.5 py-3' : 'px-0 py-3 justify-center'
+                } ${
+                  active
+                    ? 'bg-[#F97316] text-white shadow-lg shadow-[#F97316]/25'
+                    : 'text-gray-400 hover:text-white hover:bg-white/[0.06]'
+                }`}
+              >
+                <span className={`text-base shrink-0 ${active ? 'text-white' : 'text-gray-300'}`}>{t.icon}</span>
+                {sidebarOpen && <span className="flex-1 truncate">{t.label}</span>}
+              </button>
+            );
+          })}
         </div>
-      )}
 
-      {/* Tabs */}
-      <div style={{ background: 'white', borderBottom: '1px solid #E8E8E8' }}>
-        <div className="max-w-5xl mx-auto px-6 flex">
-          {([
-            { id: 'direct', icon: '⚡', label: 'Direct Upload'  },
-            { id: 'images', icon: '🖼', label: 'Image Manager'  },
-            { id: 'folder', icon: '📁', label: 'Folder Upload'  },
-            { id: 'add',    icon: '＋', label: 'Add Product'    },
-            { id: 'manage', icon: '✎',  label: 'Manage'         },
-            { id: 'hero',   icon: '🖼',  label: 'Hero Images'    },
-          ] as const).map(t => (
-            <button key={t.id} onClick={() => setTab(t.id)}
-              className="px-5 py-4 text-sm font-semibold border-b-2 transition-all flex items-center gap-2"
-              style={{
-                borderColor: tab === t.id ? '#8B5A1A' : 'transparent',
-                color:       tab === t.id ? '#8B5A1A' : '#6B6B6B',
-              }}>
-              <span className="text-base leading-none">{t.icon}</span>
-              {t.label}
-            </button>
-          ))}
+        {/* Sidebar Footer */}
+        <div className="p-3 border-t border-white/10 space-y-2 bg-[#090C12]">
+          <button
+            onClick={handleViewLiveStore}
+            title={!sidebarOpen ? "View Live Store" : undefined}
+            className={`w-full inline-flex items-center gap-2 py-2.5 rounded-xl text-xs font-semibold text-gray-300 hover:text-white bg-white/[0.06] hover:bg-white/[0.10] border border-white/[0.08] transition-all cursor-pointer ${
+              sidebarOpen ? 'px-3.5 justify-start' : 'px-0 justify-center'
+            }`}
+          >
+            <svg className="w-4 h-4 text-gray-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+            </svg>
+            {sidebarOpen && <span className="truncate">View Live Store</span>}
+          </button>
+
+          <button
+            onClick={logout}
+            title={!sidebarOpen ? "Sign Out" : undefined}
+            className={`w-full inline-flex items-center gap-2 py-2.5 rounded-xl text-xs font-semibold text-red-400 hover:text-white bg-red-500/10 hover:bg-red-600 border border-red-500/20 transition-all active:scale-98 ${
+              sidebarOpen ? 'px-3.5 justify-start' : 'px-0 justify-center'
+            }`}
+          >
+            <svg className="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+            </svg>
+            {sidebarOpen && <span>Sign Out</span>}
+          </button>
         </div>
-      </div>
+      </aside>
 
-      <div className="max-w-5xl mx-auto px-6 py-8">
-        {tab === 'direct' && <DirectUpload secret={secret} />}
-        {tab === 'images' && <ImageManager products={products} secret={secret} onUpdate={p => setProducts(p)} />}
-        {tab === 'folder' && <FolderUpload products={products} secret={secret} onDone={p => setProducts(p)} />}
-        {tab === 'add'    && <AddProduct   secret={secret} />}
-        {tab === 'manage' && <ManageProducts secret={secret} />}
-        {tab === 'hero'   && <HeroImages   secret={secret} />}
-      </div>
+      {/* ── RIGHT MAIN CONTENT AREA ─────────────────────────────── */}
+      <main className="flex-1 min-w-0 bg-[#FFFFFF] min-h-screen flex flex-col">
+        {/* DB warning banner */}
+        {dbError && (
+          <div className="bg-amber-50 border-b border-amber-200 px-6 py-2.5">
+            <p className="text-xs text-amber-800 text-center max-w-5xl mx-auto">
+              ⚠ <strong>Database offline (Atlas IP whitelist).</strong> {dbError}
+            </p>
+          </div>
+        )}
+
+        {/* Content Container */}
+        <div className="flex-1 max-w-6xl w-full mx-auto px-4 sm:px-8 py-8">
+          {tab === 'images' && <ImageManager products={products} secret={secret} onUpdate={p => setProducts(p)} />}
+          {tab === 'folder' && <FolderUpload products={products} secret={secret} onDone={p => setProducts(p)} />}
+          {tab === 'add'    && <AddProduct   secret={secret} />}
+          {tab === 'manage' && <ManageProducts secret={secret} />}
+        </div>
+      </main>
     </div>
   );
 }
 
-/* ══════════════════════════════════════════════════════════
-   DIRECT UPLOAD — no MongoDB, just Cloudinary → URL
-══════════════════════════════════════════════════════════ */
-interface DirectResult { url: string; publicId: string; copied: boolean; }
 
-function DirectUpload({ secret }: { secret: string }) {
-  const [results,    setResults]    = useState<DirectResult[]>([]);
-  const [uploading,  setUploading]  = useState(false);
-  const [drag,       setDrag]       = useState(false);
-  const [publicId,   setPublicId]   = useState('');
-  const inputRef = useRef<HTMLInputElement>(null);
-
-  const upload = async (files: File[]) => {
-    const imgs = files.filter(f => f.type.startsWith('image/'));
-    if (!imgs.length) return;
-    setUploading(true);
-    for (const file of imgs) {
-      try {
-        const b64 = await fileToBase64(file);
-        const id  = publicId.trim() || file.name.replace(/\.[^.]+$/, '').replace(/[^a-zA-Z0-9_-]/g, '_');
-        const res = await fetch('/api/admin/cloudinary-upload', {
-          method:  'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body:    JSON.stringify({ secret, imageBase64: b64, publicId: id }),
-        });
-        const data = await res.json();
-        if (!res.ok) throw new Error(data.error);
-        setResults(prev => [{ url: data.url, publicId: data.publicId, copied: false }, ...prev]);
-        setPublicId(''); // reset for next file
-      } catch (err: any) {
-        alert(`Upload failed: ${err.message}`);
-      }
-    }
-    setUploading(false);
-  };
-
-  const copy = async (url: string, i: number) => {
-    await navigator.clipboard.writeText(url);
-    setResults(prev => prev.map((r, idx) => idx === i ? { ...r, copied: true } : r));
-    setTimeout(() => setResults(prev => prev.map((r, idx) => idx === i ? { ...r, copied: false } : r)), 2000);
-  };
-
-  return (
-    <div className="max-w-2xl space-y-6">
-      <div>
-        <h2 className="text-lg font-bold" style={{ color: '#0C0C0C' }}>Direct Cloudinary Upload</h2>
-        <p className="text-sm mt-1" style={{ color: '#6B6B6B' }}>
-          Upload an image to Cloudinary and get its URL. Use this URL in the Add Product tab. This does NOT create a product entry — use Add Product for that.
-          Paste the URL into your product record manually if needed.
-        </p>
-      </div>
-
-      <div>
-        <label className="block text-sm font-semibold mb-1.5" style={{ color: '#0C0C0C' }}>
-          Public ID <span className="font-normal text-xs" style={{ color: '#9AA0A6' }}>(optional — used as filename in Cloudinary)</span>
-        </label>
-        <input value={publicId} onChange={e => setPublicId(e.target.value)}
-          placeholder="e.g. MIKA-WM-8KG  (auto-set from filename if blank)"
-          className="w-full px-4 py-2.5 rounded-xl text-sm focus:outline-none"
-          style={{ background: 'white', border: '1px solid #E8E8E8', color: '#0C0C0C' }}/>
-      </div>
-
-      {/* Drop zone */}
-      <div
-        onDragOver={e => { e.preventDefault(); setDrag(true); }}
-        onDragLeave={() => setDrag(false)}
-        onDrop={e => { e.preventDefault(); setDrag(false); upload(Array.from(e.dataTransfer.files)); }}
-        onClick={() => inputRef.current?.click()}
-        className="border-2 border-dashed rounded-2xl p-14 text-center cursor-pointer transition-all"
-        style={{ borderColor: drag ? '#8B5A1A' : '#D4C9B8', background: drag ? 'rgba(139,90,26,0.04)' : 'white' }}>
-        <input ref={inputRef} type="file" multiple accept="image/*" className="hidden"
-          onChange={e => e.target.files && upload(Array.from(e.target.files))}/>
-        {uploading
-          ? <div className="flex flex-col items-center gap-3">
-              <div className="w-10 h-10 border-2 border-t-transparent rounded-full animate-spin"
-                style={{ borderColor: '#8B5A1A', borderTopColor: 'transparent' }}/>
-              <p className="text-sm font-medium" style={{ color: '#8B5A1A' }}>Uploading to Cloudinary…</p>
-            </div>
-          : <>
-              <div className="text-4xl mb-3">☁️</div>
-              <p className="font-semibold" style={{ color: '#0C0C0C' }}>Click or drag images here</p>
-              <p className="text-sm mt-1" style={{ color: '#9AA0A6' }}>Uploads directly to Cloudinary — no database needed</p>
-            </>
-        }
-      </div>
-
-      {/* Results */}
-      {results.length > 0 && (
-        <div className="space-y-3">
-          <p className="text-sm font-semibold" style={{ color: '#0C0C0C' }}>{results.length} uploaded</p>
-          {results.map((r, i) => (
-            <div key={i} className="rounded-2xl overflow-hidden flex"
-              style={{ background: 'white', border: '1px solid #E8E8E8' }}>
-              <img src={r.url} alt="" className="w-20 h-20 object-cover shrink-0"/>
-              <div className="flex-1 px-4 py-3 min-w-0">
-                <p className="text-[10px] font-bold tracking-wider uppercase mb-1" style={{ color: '#9AA0A6' }}>
-                  smartech-products/{r.publicId}
-                </p>
-                <p className="text-xs font-mono truncate mb-2" style={{ color: '#3A3A3A' }}>{r.url}</p>
-                <button onClick={() => copy(r.url, i)}
-                  className="text-xs px-3 py-1 rounded-lg font-bold transition-colors"
-                  style={{
-                    background: r.copied ? 'rgba(22,101,52,0.10)' : '#0C0C0C',
-                    color:      r.copied ? '#166534' : '#FFFFFF',
-                  }}>
-                  {r.copied ? '✓ Copied!' : 'Copy URL'}
-                </button>
-              </div>
-            </div>
-          ))}
-        </div>
-      )}
-    </div>
-  );
-}
 
 /* ══════════════════════════════════════════════════════════
    IMAGE MANAGER
@@ -363,6 +448,7 @@ function ImageManager({ products, secret, onUpdate }: {
   const [status, setStatus] = useState<Record<string, 'uploading'|'done'|'error'>>({});
   const [search, setSearch] = useState('');
   const [filter, setFilter] = useState<'all'|'missing'|'done'>('all');
+  const [cropTarget, setCropTarget] = useState<{ sku: string; name: string; src: string } | null>(null);
 
   const filtered = products.filter(p => {
     const matchSearch = !search || p.name.toLowerCase().includes(search.toLowerCase()) || p.sku.toLowerCase().includes(search.toLowerCase());
@@ -370,13 +456,25 @@ function ImageManager({ products, secret, onUpdate }: {
     return matchSearch && matchFilter;
   });
 
-  const upload = useCallback(async (sku: string, file: File) => {
+  const handlePickFile = useCallback(async (sku: string, name: string, file: File) => {
+    try {
+      const b64 = await fileToBase64(file);
+      setCropTarget({ sku, name, src: b64 });
+    } catch {
+      alert('Could not read image file.');
+    }
+  }, []);
+
+  const handleCropSave = useCallback(async (croppedBase64: string) => {
+    if (!cropTarget) return;
+    const { sku } = cropTarget;
+    setCropTarget(null);
     setStatus(s => ({ ...s, [sku]: 'uploading' }));
     try {
-      const b64  = await fileToBase64(file);
       const resp = await fetch('/api/admin/upload-image', {
-        method: 'POST', headers: { 'Content-Type': 'application/json' },
-        body:   JSON.stringify({ secret, sku, imageBase64: b64 }),
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ secret, sku, imageBase64: croppedBase64 }),
       });
       const data = await resp.json();
       if (!resp.ok) throw new Error(data.error);
@@ -387,13 +485,15 @@ function ImageManager({ products, secret, onUpdate }: {
     } catch {
       setStatus(s => ({ ...s, [sku]: 'error' }));
     }
-  }, [secret, products, onUpdate]);
+  }, [cropTarget, secret, products, onUpdate]);
 
-  const onDrop = useCallback((sku: string, e: React.DragEvent) => {
+  const onDrop = useCallback((sku: string, name: string, e: React.DragEvent) => {
     e.preventDefault();
     const file = e.dataTransfer.files[0];
-    if (file?.type.startsWith('image/')) upload(sku, file);
-  }, [upload]);
+    if (file?.type.startsWith('image/')) {
+      handlePickFile(sku, name, file);
+    }
+  }, [handlePickFile]);
 
   if (products.length === 0) {
     return (
@@ -458,13 +558,13 @@ function ImageManager({ products, secret, onUpdate }: {
           return (
             <div key={p.sku}
               onDragOver={e => e.preventDefault()}
-              onDrop={e => onDrop(p.sku, e)}
-              className="rounded-2xl overflow-hidden group transition-all duration-300 hover:shadow-[0_8px_32px_rgba(0,0,0,0.10)] hover:-translate-y-0.5"
+              onDrop={e => onDrop(p.sku, p.name, e)}
+              className="rounded-2xl overflow-hidden group transition-all duration-300 hover:shadow-[0_8px_32px_rgba(0,0,0,0.10)] hover:-translate-y-0.5 relative"
               style={{ background: 'white', border: '1px solid #E8E8E8' }}>
               <label className="block relative aspect-square cursor-pointer overflow-hidden"
                 style={{ background: hasImg ? '#FFFFFF' : '#FAFAFA' }}>
                 <input type="file" accept="image/*" className="hidden sr-only"
-                  onChange={e => e.target.files?.[0] && upload(p.sku, e.target.files[0])} />
+                  onChange={e => e.target.files?.[0] && handlePickFile(p.sku, p.name, e.target.files[0])} />
                 {hasImg ? (
                   <img src={p.images[0]} alt={p.name}
                     className="w-full h-full object-contain p-4 group-hover:scale-105 transition-transform duration-300"/>
@@ -477,15 +577,16 @@ function ImageManager({ products, secret, onUpdate }: {
                       </svg>
                     </div>
                     <span className="text-[10px] font-semibold tracking-wide text-center px-3 leading-tight" style={{ color: '#8B5A1A' }}>
-                      Click to upload<br/>or drag here
+                      Click to crop & upload<br/>or drag here
                     </span>
                   </div>
                 )}
                 {hasImg && (
-                  <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
-                    style={{ background: 'rgba(12,12,12,0.40)' }}>
-                    <span className="text-white text-[11px] font-bold px-3 py-1.5 rounded-full"
-                      style={{ background: 'rgba(12,12,12,0.55)' }}>Change image</span>
+                  <div className="absolute inset-0 flex items-center justify-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity"
+                    style={{ background: 'rgba(12,12,12,0.50)' }}>
+                    <span className="text-white text-[11px] font-bold px-3 py-1.5 rounded-full bg-[#0C0C0C]/80 border border-white/20">
+                      ✂ Crop / Change
+                    </span>
                   </div>
                 )}
                 {st === 'uploading' && (
@@ -509,8 +610,22 @@ function ImageManager({ products, secret, onUpdate }: {
                   </div>
                 )}
               </label>
+
               <div className="p-3">
-                <p className="text-[9px] font-bold tracking-widest uppercase mb-0.5" style={{ color: '#9AA0A6' }}>{p.brand}</p>
+                <div className="flex items-center justify-between gap-2 mb-1.5">
+                  <span className="text-[9px] font-bold tracking-widest uppercase text-gray-400 truncate">{p.brand}</span>
+                  {hasImg && (
+                    <button
+                      type="button"
+                      onClick={() => setCropTarget({ sku: p.sku, name: p.name, src: p.images[0] })}
+                      className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-[11px] font-bold text-white bg-[#F97316] hover:bg-[#EA580C] shadow-xs shadow-[#F97316]/20 transition-all active:scale-95 cursor-pointer shrink-0"
+                      title="Crop and adjust this product's image"
+                    >
+                      <span className="text-xs leading-none">✂</span>
+                      <span>Crop</span>
+                    </button>
+                  )}
+                </div>
                 <p className="text-[11.5px] font-medium leading-snug line-clamp-2" style={{ color: '#0C0C0C' }}>{p.name}</p>
                 <p className="text-[10px] font-mono mt-1" style={{ color: '#9AA0A6' }}>{p.sku}</p>
               </div>
@@ -518,6 +633,17 @@ function ImageManager({ products, secret, onUpdate }: {
           );
         })}
       </div>
+
+      {/* Interactive Crop Modal */}
+      {cropTarget && (
+        <ImageCropperModal
+          imageSrc={cropTarget.src}
+          title={`Crop Image — ${cropTarget.name}`}
+          aspectRatio={1}
+          onCrop={handleCropSave}
+          onClose={() => setCropTarget(null)}
+        />
+      )}
 
       {filtered.length === 0 && (
         <div className="text-center py-16" style={{ color: '#9AA0A6' }}>
@@ -691,18 +817,32 @@ function AddProduct({ secret }: { secret: string }) {
   });
   const [imageFile, setImageFile]  = useState<File | null>(null);
   const [imagePreview, setPreview] = useState('');
+  const [croppedBase64, setCroppedBase64] = useState('');
+  const [cropSrc, setCropSrc]       = useState<string | null>(null);
   const [saving,  setSaving]       = useState(false);
   const [success, setSuccess]      = useState('');
   const [error,   setError]        = useState('');
 
   const set = (k: string, v: string) => setForm(f => ({ ...f, [k]: v }));
 
+  const handlePick = async (file: File) => {
+    setImageFile(file);
+    const b64 = await fileToBase64(file);
+    setCropSrc(b64);
+  };
+
+  const handleCropDone = (cropped: string) => {
+    setCroppedBase64(cropped);
+    setPreview(cropped);
+    setCropSrc(null);
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setSaving(true); setError(''); setSuccess('');
     try {
-      let imageBase64 = '';
-      if (imageFile) imageBase64 = await fileToBase64(imageFile);
+      let imageBase64 = croppedBase64;
+      if (!imageBase64 && imageFile) imageBase64 = await fileToBase64(imageFile);
       const res = await fetch('/api/admin/products', {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -721,7 +861,7 @@ function AddProduct({ secret }: { secret: string }) {
       if (!res.ok) throw new Error(data.error || 'Failed');
       setSuccess(`✓ "${data.product?.name ?? form.name}" added successfully`);
       setForm({ name:'', brand:'Mika', sku:'', category:'KITCHEN', price:'', comparePrice:'', stock:'10', subcategory:'', description:'', isFeatured: false });
-      setImageFile(null); setPreview('');
+      setImageFile(null); setPreview(''); setCroppedBase64('');
     } catch (err: any) { setError(err.message); }
     setSaving(false);
   };
@@ -737,17 +877,50 @@ function AddProduct({ secret }: { secret: string }) {
 
       <div>
         <label className="block text-sm font-semibold mb-2" style={{ color: '#0C0C0C' }}>Product Image</label>
-        <label
+        <div
           onDragOver={e => e.preventDefault()}
-          onDrop={e => { e.preventDefault(); const f = e.dataTransfer.files[0]; if (f?.type.startsWith('image/')) { setImageFile(f); setPreview(URL.createObjectURL(f)); } }}
-          className="block border-2 border-dashed rounded-2xl p-6 text-center cursor-pointer"
+          onDrop={e => { e.preventDefault(); const f = e.dataTransfer.files[0]; if (f?.type.startsWith('image/')) handlePick(f); }}
+          className="border-2 border-dashed rounded-2xl p-6 text-center relative"
           style={{ borderColor: '#D4C9B8', background: '#FAFAFA' }}>
-          <input type="file" accept="image/*" onChange={e => { const f = e.target.files?.[0]; if (!f) return; setImageFile(f); setPreview(URL.createObjectURL(f)); }} className="hidden" />
-          {imagePreview
-            ? <img src={imagePreview} alt="Preview" className="w-32 h-32 object-contain mx-auto rounded-xl"/>
-            : <div style={{ color: '#9AA0A6' }}><div className="text-3xl mb-2">🖼</div><p className="text-sm">Click or drag image here</p></div>}
-        </label>
+          <input type="file" id="add-product-img" accept="image/*" onChange={e => { const f = e.target.files?.[0]; if (f) handlePick(f); }} className="hidden" />
+          {imagePreview ? (
+            <div className="flex flex-col items-center gap-3">
+              <img src={imagePreview} alt="Preview" className="w-36 h-36 object-contain rounded-xl border border-gray-200 bg-white p-2 shadow-xs"/>
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => setCropSrc(imagePreview)}
+                  className="px-3 py-1.5 rounded-xl text-xs font-semibold bg-[#F97316]/10 text-[#F97316] hover:bg-[#F97316]/20 border border-[#F97316]/30 transition-colors"
+                >
+                  ✂ Re-crop Image
+                </button>
+                <label
+                  htmlFor="add-product-img"
+                  className="px-3 py-1.5 rounded-xl text-xs font-semibold bg-gray-200 text-gray-700 hover:bg-gray-300 cursor-pointer transition-colors"
+                >
+                  Change Image
+                </label>
+              </div>
+            </div>
+          ) : (
+            <label htmlFor="add-product-img" className="cursor-pointer block py-4" style={{ color: '#9AA0A6' }}>
+              <div className="text-3xl mb-2">🖼</div>
+              <p className="text-sm font-semibold text-gray-700">Click to crop & upload image</p>
+              <p className="text-xs text-gray-400 mt-1">Supports drag and drop • JPG, PNG, WEBP</p>
+            </label>
+          )}
+        </div>
       </div>
+
+      {cropSrc && (
+        <ImageCropperModal
+          imageSrc={cropSrc}
+          title="Crop Product Image"
+          aspectRatio={1}
+          onCrop={handleCropDone}
+          onClose={() => setCropSrc(null)}
+        />
+      )}
 
       <div className="grid grid-cols-2 gap-4">
         <div className="col-span-2">
@@ -1121,8 +1294,9 @@ function ManageProducts({ secret }: { secret: string }) {
     setLoading(false);
   };
 
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  useState(() => { load(); });
+  useEffect(() => {
+    load();
+  }, []);
 
   const patch = async (sku: string, fields: Partial<ManagedProduct>) => {
     setSaving(sku);
@@ -1379,22 +1553,28 @@ function ManageProducts({ secret }: { secret: string }) {
                   )}
 
                   {/* Action buttons */}
-                  <div className="flex items-center gap-1 flex-shrink-0">
-                    <button onClick={() => setEditing(p)}
-                      className="p-2 rounded-xl text-gray-400 hover:text-gray-700 hover:bg-gray-100 transition-colors"
-                      title="Edit">
-                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <div className="flex items-center gap-2 flex-shrink-0">
+                    <button
+                      onClick={() => setEditing(p)}
+                      className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold text-gray-800 bg-gray-100 hover:bg-gray-200 border border-gray-200 shadow-xs transition-all active:scale-95"
+                      title="Edit Product Details"
+                    >
+                      <svg className="w-3.5 h-3.5 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
                           d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
                       </svg>
+                      <span>Edit</span>
                     </button>
-                    <button onClick={() => setConfirmDelete(p)}
-                      className="p-2 rounded-xl text-gray-400 hover:text-red-500 hover:bg-red-50 transition-colors"
-                      title="Delete">
-                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <button
+                      onClick={() => setConfirmDelete(p)}
+                      className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold text-red-700 bg-red-50 hover:bg-red-100 border border-red-200/80 shadow-xs transition-all active:scale-95"
+                      title="Delete Product"
+                    >
+                      <svg className="w-3.5 h-3.5 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
                           d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
                       </svg>
+                      <span>Delete</span>
                     </button>
                   </div>
 
@@ -1418,174 +1598,5 @@ function ManageProducts({ secret }: { secret: string }) {
         )}
       </div>
     </>
-  );
-}
-
-/* ══════════════════════════════════════════════════════════
-   HERO IMAGES — Upload images that appear in the homepage hero
-══════════════════════════════════════════════════════════ */
-function HeroImages({ secret }: { secret: string }) {
-  const SLOTS = [1, 2, 3, 4];
-
-  const [slots, setSlots] = useState<Record<number, { src: string; alt: string; loading: boolean; error: string }>>({
-    1: { src: '', alt: '', loading: false, error: '' },
-    2: { src: '', alt: '', loading: false, error: '' },
-    3: { src: '', alt: '', loading: false, error: '' },
-    4: { src: '', alt: '', loading: false, error: '' },
-  });
-  const [loadingAll, setLoadingAll] = useState(true);
-  const [success, setSuccess] = useState('');
-
-  // Load current hero images on mount
-  useState(() => {
-    fetch(`/api/admin/hero?secret=${encodeURIComponent(secret)}`)
-      .then(r => r.json())
-      .then(data => {
-        if (data.images) {
-          const updated = { ...slots };
-          data.images.forEach((img: any, i: number) => {
-            const slot = i + 1;
-            if (updated[slot]) updated[slot] = { ...updated[slot], src: img.src, alt: img.alt ?? '' };
-          });
-          setSlots(updated);
-        }
-      })
-      .catch(() => {})
-      .finally(() => setLoadingAll(false));
-  });
-
-  const upload = async (slot: number, file: File) => {
-    const alt = slots[slot].alt || `Hero image ${slot}`;
-    setSlots(s => ({ ...s, [slot]: { ...s[slot], loading: true, error: '' } }));
-    try {
-      const base64 = await new Promise<string>((res, rej) => {
-        const r = new FileReader();
-        r.onload = e => res(e.target!.result as string);
-        r.onerror = () => rej(new Error('read failed'));
-        r.readAsDataURL(file);
-      });
-      const resp = await fetch('/api/admin/hero', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ secret, slot, imageBase64: base64, alt }),
-      });
-      const data = await resp.json();
-      if (!resp.ok) throw new Error(data.error || 'Failed');
-      setSlots(s => ({ ...s, [slot]: { ...s[slot], src: data.url, loading: false } }));
-      setSuccess(`✓ Slot ${slot} updated`);
-      setTimeout(() => setSuccess(''), 3000);
-    } catch (e: any) {
-      setSlots(s => ({ ...s, [slot]: { ...s[slot], loading: false, error: e.message } }));
-    }
-  };
-
-  const removeImage = async (slot: number) => {
-    if (!confirm(`Delete hero image ${slot}?`)) return;
-    setSlots(s => ({ ...s, [slot]: { ...s[slot], loading: true, error: '' } }));
-    try {
-      const resp = await fetch('/api/admin/hero', {
-        method: 'DELETE',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ secret, slot }),
-      });
-      if (!resp.ok) throw new Error((await resp.json()).error || 'Failed');
-      setSlots(s => ({ ...s, [slot]: { src: '', alt: '', loading: false, error: '' } }));
-    } catch (e: any) {
-      setSlots(s => ({ ...s, [slot]: { ...s[slot], loading: false, error: e.message } }));
-    }
-  };
-
-  if (loadingAll) return (
-    <div className="flex items-center justify-center py-24">
-      <div className="w-8 h-8 rounded-full border-2 border-t-transparent animate-spin" style={{ borderColor: '#8B5A1A', borderTopColor: 'transparent' }}/>
-    </div>
-  );
-
-  return (
-    <div className="space-y-6">
-      <div>
-        <h2 className="text-lg font-bold" style={{ color: '#0C0C0C' }}>Hero Images</h2>
-        <p className="text-xs mt-1" style={{ color: '#9B8B7A' }}>
-          Upload up to 4 images for the homepage hero section. Images appear in slot order (1 → 4).
-        </p>
-      </div>
-
-      {success && (
-        <div className="px-4 py-3 rounded-xl text-sm font-medium"
-          style={{ background: 'rgba(22,101,52,0.08)', border: '1px solid rgba(22,101,52,0.20)', color: '#166534' }}>
-          {success}
-        </div>
-      )}
-
-      <div className="grid grid-cols-2 gap-4">
-        {SLOTS.map(slot => {
-          const s = slots[slot];
-          return (
-            <div key={slot} className="rounded-2xl border overflow-hidden" style={{ borderColor: '#E8E8E8' }}>
-              {/* Preview area */}
-              <div className="relative aspect-[4/3] bg-gray-100">
-                {s.src ? (
-                  <img src={s.src} alt={s.alt} className="w-full h-full object-cover"/>
-                ) : (
-                  <div className="absolute inset-0 flex flex-col items-center justify-center" style={{ color: '#9AA0A6' }}>
-                    <div className="text-4xl mb-2">🖼</div>
-                    <p className="text-xs font-medium">Slot {slot} — empty</p>
-                    <p className="text-[10px] mt-0.5">Will use Unsplash fallback</p>
-                  </div>
-                )}
-                {/* Slot badge */}
-                <div className="absolute top-2 left-2 w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold text-white"
-                  style={{ background: 'rgba(0,0,0,0.55)' }}>
-                  {slot}
-                </div>
-                {/* Delete btn */}
-                {s.src && !s.loading && (
-                  <button onClick={() => removeImage(slot)}
-                    className="absolute top-2 right-2 w-7 h-7 rounded-full flex items-center justify-center text-white transition-opacity hover:opacity-75"
-                    style={{ background: 'rgba(220,38,38,0.8)' }}>
-                    <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12"/>
-                    </svg>
-                  </button>
-                )}
-                {s.loading && (
-                  <div className="absolute inset-0 flex items-center justify-center bg-white/70">
-                    <div className="w-6 h-6 rounded-full border-2 border-t-transparent animate-spin" style={{ borderColor: '#8B5A1A', borderTopColor: 'transparent' }}/>
-                  </div>
-                )}
-              </div>
-
-              {/* Controls */}
-              <div className="p-3 space-y-2" style={{ background: 'white' }}>
-                <input
-                  value={s.alt}
-                  onChange={e => setSlots(ss => ({ ...ss, [slot]: { ...ss[slot], alt: e.target.value } }))}
-                  placeholder={`Alt text for slot ${slot}…`}
-                  className="w-full px-3 py-2 rounded-lg text-xs focus:outline-none"
-                  style={{ background: '#FAFAFA', border: '1px solid #E8E8E8', color: '#0C0C0C' }}
-                />
-                <label className="flex items-center gap-2 cursor-pointer w-full px-3 py-2 rounded-lg text-xs font-semibold justify-center transition-colors"
-                  style={{ background: '#0C0C0C', color: '#FFFFFF' }}>
-                  <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/>
-                  </svg>
-                  {s.src ? 'Replace image' : 'Upload image'}
-                  <input type="file" accept="image/*" className="hidden"
-                    onChange={e => { const f = e.target.files?.[0]; if (f) upload(slot, f); }}/>
-                </label>
-                {s.error && <p className="text-[10px] text-red-500">{s.error}</p>}
-              </div>
-            </div>
-          );
-        })}
-      </div>
-
-      <div className="p-4 rounded-xl text-xs leading-relaxed" style={{ background: 'rgba(139,90,26,0.06)', border: '1px solid rgba(139,90,26,0.15)', color: '#6B5A3A' }}>
-        <p className="font-semibold mb-1">Tips for great hero images:</p>
-        <p>• Use landscape images (wider than tall) — 4:3 or 16:9 ratio works best</p>
-        <p>• Recommended size: 1200×800px or larger for sharp display</p>
-        <p>• If all slots are empty, the homepage uses Unsplash placeholder images</p>
-      </div>
-    </div>
   );
 }

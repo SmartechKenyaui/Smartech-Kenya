@@ -2,7 +2,16 @@
 import { useState, useRef } from 'react';
 
 const CATS = ['KITCHEN','SMARTPHONES','LAPTOPS','AUDIO_TV','HOME_APPLIANCES','SMART_HOME','BEDROOM','ELECTRICAL'];
-const BRANDS = ['Mika','Hisense','Samsung','LG','Ramtons','HP','Von Hotpoint','Sony','Tecno','Infinix','Beko','TCL','Other'];
+const BRANDS = [
+  'Acer','Alcatel','Anker','Apple','Ariston','Asus','Beko','Belkin','Black+Decker','Bolesi',
+  'Bosch','Bose','Brother','Bruhm','Candy','Canon','D-Link','Defy','Dell','EcoMax',
+  'Electrolux','Epson','Geepas','Google','Haier','Harman Kardon','Hisense','Honor','Hotpoint','HP',
+  'Huawei','Infinix','itel','JBL','JVC','Kenwood','Lenovo','LG','Marshall','Midea',
+  'Mika','Microsoft','Motorola','Moulinex','MSI','Nikai','Nikon','Nokia','Nunix','OnePlus',
+  'Oppo','Panasonic','Philips','POCO','Ramtons','Rashnik','Realme','Redmi','Roch','Russell Hobbs',
+  'Samsung','Scanfrost','Sharp','Skyworth','SmartPro','Sony','TCL','Tecno','Tefal','Tenda',
+  'Toshiba','TP-Link','Ubiquiti','Vitron','Vivo','Von Hotpoint','Whirlpool','Xiaomi','ZTE','Other',
+];
 
 export default function UploadPage() {
   const [secret,  setSecret]  = useState('');
@@ -95,7 +104,7 @@ export default function UploadPage() {
           </div>
         ))}
 
-        <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:12, marginBottom:14 }}>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-3.5">
           <div>
             <label style={{ display:'block', fontWeight:600, fontSize:13, color:'#333', marginBottom:5 }}>Brand</label>
             <select value={form.brand} onChange={e => setForm(p => ({ ...p, brand: e.target.value }))}

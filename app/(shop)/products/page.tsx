@@ -8,7 +8,7 @@ export default function ProductsPage({ searchParams }: { searchParams: Record<st
   return (
     <div className="min-h-screen bg-white">
       {/* Products immediately — no hero panel, no filter sidebar */}
-      <div className="max-w-[1320px] mx-auto px-6 pt-6 pb-14">
+      <div className="max-w-[1440px] 2xl:max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8 pt-6 pb-14">
         <Suspense fallback={<GridSkeleton />}>
           <ProductList searchParams={searchParams} />
         </Suspense>
@@ -19,7 +19,7 @@ export default function ProductsPage({ searchParams }: { searchParams: Record<st
 
 function GridSkeleton() {
   return (
-    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+    <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 2xl:grid-cols-5 gap-3 sm:gap-4 lg:gap-5">
       {[...Array(12)].map((_, i) => (
         <div key={i} className="bg-white rounded-2xl overflow-hidden border border-[#E8E8E8]">
           <div className="aspect-[4/3] skeleton"/>

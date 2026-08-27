@@ -157,63 +157,64 @@ export default function CartPage() {
         />
       )}
 
-      <div className="min-h-screen bg-cream-warm pt-[68px] pb-16">
-        <div className="max-w-[1320px] mx-auto px-6 py-12">
-          <div className="flex justify-between items-baseline mb-10">
-            <h1 className="font-display text-ink" style={{ fontSize: 'clamp(2.5rem,5vw,4rem)', fontWeight: 400 }}>
+      <div className="min-h-screen bg-cream-warm pt-[64px] pb-16">
+        <div className="max-w-[1440px] 2xl:max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
+          <div className="flex justify-between items-baseline mb-8 sm:mb-10">
+            <h1 className="font-display text-ink" style={{ fontSize: 'clamp(2.2rem,4.5vw,3.8rem)', fontWeight: 600 }}>
               Your Cart
             </h1>
-            <button onClick={() => dispatch(clearCart())} className="text-sm text-ink-faint hover:text-ink transition-colors">
+            <button onClick={() => dispatch(clearCart())} className="text-xs sm:text-sm text-ink-faint hover:text-ink transition-colors font-medium">
               Clear all
             </button>
           </div>
 
-          <div className="flex flex-col lg:flex-row gap-8">
-            <div className="flex-1 space-y-3">
+          <div className="flex flex-col lg:flex-row gap-6 sm:gap-8">
+            <div className="flex-1 space-y-3 sm:space-y-4">
               {items.map(item => (
-                <div key={item.productId} className="bg-white rounded-2xl border border-cream-warm p-5 flex gap-4">
-                  <div className="w-24 h-24 bg-cream rounded-xl overflow-hidden relative shrink-0">
+                <div key={item.productId} className="bg-white rounded-2xl border border-cream-warm p-4 sm:p-5 flex gap-3 sm:gap-4 items-start sm:items-center">
+                  <div className="w-20 h-20 sm:w-24 sm:h-24 bg-cream rounded-xl overflow-hidden relative shrink-0">
                     {item.image
-                      ? <Image src={item.image} alt={item.name} fill sizes="96px" className="object-contain p-3"/>
+                      ? <Image src={item.image} alt={item.name} fill sizes="96px" className="object-contain p-2 sm:p-3"/>
                       : <div className="absolute inset-0 bg-cream-warm"/>
                     }
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className="font-medium text-sm text-ink line-clamp-2 leading-snug mb-3">{item.name}</p>
-                    <p className="price price-md">KES {item.price.toLocaleString()}</p>
-                    <div className="flex items-center gap-1 mt-3 bg-cream rounded-xl w-fit px-2 py-1.5 border border-cream-warm">
+                    <p className="font-semibold text-xs sm:text-sm text-ink line-clamp-2 leading-snug mb-1 sm:mb-2">{item.name}</p>
+                    <p className="price price-sm sm:price-md">KES {item.price.toLocaleString()}</p>
+                    <div className="flex items-center gap-1 mt-2 sm:mt-3 bg-cream rounded-xl w-fit px-2 py-1 border border-cream-warm">
                       <button
                         onClick={() => item.quantity > 1
                           ? dispatch(updateQuantity({ productId: item.productId, quantity: item.quantity - 1 }))
                           : dispatch(removeFromCart(item.productId))
                         }
-                        className="w-7 h-7 flex items-center justify-center rounded-lg hover:bg-white transition-all text-ink-muted text-lg font-light"
+                        className="w-6 h-6 sm:w-7 sm:h-7 flex items-center justify-center rounded-lg hover:bg-white transition-all text-ink-muted text-base sm:text-lg font-light"
                       >-</button>
-                      <span className="w-7 text-center text-sm font-semibold text-ink">{item.quantity}</span>
+                      <span className="w-6 sm:w-7 text-center text-xs sm:text-sm font-bold text-ink">{item.quantity}</span>
                       <button
                         onClick={() => item.quantity < item.stock && dispatch(updateQuantity({ productId: item.productId, quantity: item.quantity + 1 }))}
                         disabled={item.quantity >= item.stock}
-                        className="w-7 h-7 flex items-center justify-center rounded-lg hover:bg-white transition-all text-ink-muted text-lg font-light disabled:opacity-30"
+                        className="w-6 h-6 sm:w-7 sm:h-7 flex items-center justify-center rounded-lg hover:bg-white transition-all text-ink-muted text-base sm:text-lg font-light disabled:opacity-30"
                       >+</button>
                     </div>
                   </div>
-                  <div className="flex flex-col justify-between items-end shrink-0">
+                  <div className="flex flex-col justify-between items-end shrink-0 self-stretch sm:self-auto">
                     <button onClick={() => dispatch(removeFromCart(item.productId))}
-                      className="text-cream-muted hover:text-red-400 transition-colors p-1">
+                      className="text-cream-muted hover:text-red-500 transition-colors p-1"
+                      aria-label="Remove item">
                       <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12"/>
                       </svg>
                     </button>
-                    <span className="price price-md">KES {(item.price * item.quantity).toLocaleString()}</span>
+                    <span className="price price-sm sm:price-md font-bold mt-auto">KES {(item.price * item.quantity).toLocaleString()}</span>
                   </div>
                 </div>
               ))}
             </div>
 
-            <div className="w-full lg:w-80 shrink-0">
-              <div className="bg-white rounded-2xl border border-cream-warm p-7 sticky top-[88px]">
-                <h2 className="font-semibold text-ink mb-6">Order Summary</h2>
-                <div className="space-y-3.5 text-sm mb-6 text-ink-faint">
+            <div className="w-full lg:w-88 xl:w-96 shrink-0">
+              <div className="bg-white rounded-2xl border border-cream-warm p-6 sm:p-7 sticky top-[84px] shadow-sm">
+                <h2 className="font-bold text-ink text-base sm:text-lg mb-5 sm:mb-6">Order Summary</h2>
+                <div className="space-y-3 text-xs sm:text-sm mb-6 text-ink-faint">
                   <div className="flex justify-between">
                     <span>Subtotal</span>
                     <span className="price price-sm">KES {total.toLocaleString()}</span>
@@ -221,27 +222,27 @@ export default function CartPage() {
                   <div className="flex justify-between">
                     <span>Delivery</span>
                     {delivery === 0
-                      ? <span className="text-forest-600 font-semibold">Free</span>
+                      ? <span className="text-emerald-600 font-bold">Free</span>
                       : <span className="price price-sm">KES {delivery.toLocaleString()}</span>
                     }
                   </div>
                   {delivery > 0 && (
-                    <p className="text-xs text-cream-muted">
+                    <p className="text-[11px] text-cream-muted">
                       Add KES {(5000 - total).toLocaleString()} more for free delivery
                     </p>
                   )}
                 </div>
-                <div className="border-t border-cream-warm pt-5 mb-6 flex justify-between">
-                  <span className="font-bold text-ink">Total</span>
-                  <span className="price price-lg">KES {grandTotal.toLocaleString()}</span>
+                <div className="border-t border-cream-warm pt-4 mb-6 flex justify-between items-baseline">
+                  <span className="font-bold text-ink text-sm sm:text-base">Total</span>
+                  <span className="price price-lg sm:price-xl">KES {grandTotal.toLocaleString()}</span>
                 </div>
                 <button
                   onClick={() => setShowCheckout(true)}
-                  className="w-full py-4 bg-ink text-cream text-sm font-semibold rounded-xl hover:bg-ink-soft transition-all active:scale-[0.98] flex items-center justify-center gap-2.5 mb-3">
+                  className="w-full py-3.5 sm:py-4 bg-ink text-cream text-sm font-semibold rounded-xl hover:bg-ink-soft transition-all active:scale-[0.98] flex items-center justify-center gap-2.5 mb-3 shadow-md">
                   Proceed to Order
                 </button>
                 <Link href="/products"
-                  className="block text-center text-xs text-ink-faint hover:text-ink mt-4 transition-colors">
+                  className="block text-center text-xs text-ink-faint hover:text-ink mt-3 transition-colors">
                   Continue Shopping
                 </Link>
               </div>
