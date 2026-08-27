@@ -311,27 +311,70 @@ export default function AdminPage() {
   }
 
   const NAV_ITEMS = [
-    { id: 'manage', icon: '✎',  label: 'Manage Products' },
-    { id: 'add',    icon: '＋', label: 'Add Product'     },
-    { id: 'images', icon: '🖼', label: 'Image Manager'   },
-    { id: 'folder', icon: '📁', label: 'Folder Upload'   },
+    {
+      id: 'manage',
+      label: 'Manage Products',
+      icon: (
+        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
+        </svg>
+      ),
+    },
+    {
+      id: 'add',
+      label: 'Add Product',
+      icon: (
+        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M12 9v3m0 0v3m0-3h3m-3 0H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z" />
+        </svg>
+      ),
+    },
+    {
+      id: 'images',
+      label: 'Image Manager',
+      icon: (
+        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+        </svg>
+      ),
+    },
+    {
+      id: 'folder',
+      label: 'Folder Upload',
+      icon: (
+        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z" />
+        </svg>
+      ),
+    },
   ] as const;
 
   return (
-    <div className="min-h-screen flex flex-col md:flex-row bg-[#F8F9FA]">
-      {/* ── LEFT SIDEBAR ────────────────────────────────────────── */}
+    <div className="min-h-screen flex flex-row bg-[#F8F9FA] relative w-full overflow-x-hidden">
+      {/* ── MOBILE BACKDROP (When Sidebar is Expanded on Mobile) ── */}
+      {sidebarOpen && (
+        <div
+          onClick={() => setSidebarOpen(false)}
+          className="fixed inset-0 bg-black/60 backdrop-blur-xs z-30 md:hidden transition-opacity"
+          aria-hidden="true"
+        />
+      )}
+
+      {/* ── LEFT SIDEBAR (Visible on Left Side on ALL Devices) ───── */}
       <aside
-        className={`bg-[#0C0F17] text-white flex flex-col shrink-0 border-r border-white/10 md:min-h-screen md:sticky md:top-0 md:h-screen transition-all duration-300 ${
-          sidebarOpen ? 'w-full md:w-64 lg:w-72' : 'w-full md:w-20'
+        className={`bg-[#0C0F17] text-white flex flex-col shrink-0 border-r border-white/10 min-h-screen sticky top-0 h-screen z-40 transition-all duration-300 ${
+          sidebarOpen
+            ? 'w-64 lg:w-72 fixed md:sticky inset-y-0 left-0 shadow-2xl md:shadow-none'
+            : 'w-16 md:w-20'
         }`}
       >
-        {/* Brand Header & Toggle */}
-        <div className="p-4 border-b border-white/10 flex items-center justify-between gap-2">
+        {/* Brand Header & Left Toggle Button */}
+        <div className={`p-3 sm:p-4 border-b border-white/10 flex items-center ${sidebarOpen ? 'justify-between' : 'justify-center'} gap-2`}>
           <div className="flex items-center gap-3 overflow-hidden">
             <img
               src="/admin-icon.jpeg"
               alt="Smartech Admin"
-              className="w-10 h-10 rounded-xl object-cover border border-white/20 shadow-md ring-2 ring-[#F97316]/20 shrink-0"
+              className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl object-cover border border-white/20 shadow-md ring-2 ring-[#F97316]/20 shrink-0"
             />
             {sidebarOpen && (
               <div className="min-w-0">
@@ -342,7 +385,9 @@ export default function AdminPage() {
           </div>
           <button
             onClick={() => setSidebarOpen(!sidebarOpen)}
-            className="w-8 h-8 rounded-lg flex items-center justify-center text-white bg-white/20 hover:bg-[#F97316] border border-white/25 shadow-sm transition-all active:scale-95 shrink-0 cursor-pointer"
+            className={`rounded-lg flex items-center justify-center text-white bg-white/15 hover:bg-[#F97316] border border-white/20 shadow-sm transition-all active:scale-95 shrink-0 cursor-pointer ${
+              sidebarOpen ? 'w-8 h-8' : 'w-7 h-7 mt-2 md:mt-0'
+            } ${!sidebarOpen ? 'hidden md:flex' : 'flex'}`}
             title={sidebarOpen ? "Collapse sidebar" : "Expand sidebar"}
           >
             <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -355,8 +400,23 @@ export default function AdminPage() {
           </button>
         </div>
 
-        {/* Navigation Items (Left Side List) */}
-        <div className="flex-1 p-2.5 space-y-1.5 overflow-y-auto">
+        {/* Mobile quick expand button when collapsed on mobile */}
+        {!sidebarOpen && (
+          <div className="p-2 border-b border-white/10 flex md:hidden justify-center">
+            <button
+              onClick={() => setSidebarOpen(true)}
+              className="w-10 h-8 rounded-lg flex items-center justify-center text-gray-300 hover:text-white bg-white/10 hover:bg-[#F97316] transition-all cursor-pointer"
+              title="Expand Left Dashboard"
+            >
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M13 5l7 7-7 7M5 5l7 7-7 7" />
+              </svg>
+            </button>
+          </div>
+        )}
+
+        {/* Navigation Items (Left Side Vertical List) */}
+        <div className="flex-1 p-2 sm:p-2.5 space-y-1.5 overflow-y-auto">
           {sidebarOpen && (
             <p className="px-3 py-2 text-[10px] font-bold uppercase tracking-wider text-gray-500">Navigation</p>
           )}
@@ -365,9 +425,15 @@ export default function AdminPage() {
             return (
               <button
                 key={t.id}
-                onClick={() => setTab(t.id)}
+                onClick={() => {
+                  setTab(t.id);
+                  // Auto-collapse drawer on mobile after selection for seamless experience
+                  if (typeof window !== 'undefined' && window.innerWidth < 768) {
+                    setSidebarOpen(false);
+                  }
+                }}
                 title={!sidebarOpen ? t.label : undefined}
-                className={`w-full text-left rounded-xl text-xs font-semibold transition-all flex items-center gap-3 ${
+                className={`w-full text-left rounded-xl text-xs font-semibold transition-all flex items-center gap-3 relative group ${
                   sidebarOpen ? 'px-3.5 py-3' : 'px-0 py-3 justify-center'
                 } ${
                   active
@@ -375,15 +441,20 @@ export default function AdminPage() {
                     : 'text-gray-400 hover:text-white hover:bg-white/[0.06]'
                 }`}
               >
-                <span className={`text-base shrink-0 ${active ? 'text-white' : 'text-gray-300'}`}>{t.icon}</span>
+                <span className={`shrink-0 transition-transform duration-150 ${active ? 'text-white scale-110' : 'text-gray-400 group-hover:text-white'}`}>
+                  {t.icon}
+                </span>
                 {sidebarOpen && <span className="flex-1 truncate">{t.label}</span>}
+                {!sidebarOpen && active && (
+                  <span className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-6 bg-white rounded-r-full" />
+                )}
               </button>
             );
           })}
         </div>
 
-        {/* Sidebar Footer */}
-        <div className="p-3 border-t border-white/10 space-y-2 bg-[#090C12]">
+        {/* Sidebar Footer (Left Bottom) */}
+        <div className="p-2 sm:p-3 border-t border-white/10 space-y-2 bg-[#090C12]">
           <button
             onClick={handleViewLiveStore}
             title={!sidebarOpen ? "View Live Store" : undefined}
@@ -400,7 +471,7 @@ export default function AdminPage() {
           <button
             onClick={logout}
             title={!sidebarOpen ? "Sign Out" : undefined}
-            className={`w-full inline-flex items-center gap-2 py-2.5 rounded-xl text-xs font-semibold text-red-400 hover:text-white bg-red-500/10 hover:bg-red-600 border border-red-500/20 transition-all active:scale-98 ${
+            className={`w-full inline-flex items-center gap-2 py-2.5 rounded-xl text-xs font-semibold text-red-400 hover:text-white bg-red-500/10 hover:bg-red-600 border border-red-500/20 transition-all active:scale-98 cursor-pointer ${
               sidebarOpen ? 'px-3.5 justify-start' : 'px-0 justify-center'
             }`}
           >
@@ -414,9 +485,27 @@ export default function AdminPage() {
 
       {/* ── RIGHT MAIN CONTENT AREA ─────────────────────────────── */}
       <main className="flex-1 min-w-0 bg-[#FFFFFF] min-h-screen flex flex-col">
+        {/* Mobile Top Sub-Header with Left Sidebar Opener */}
+        <div className="md:hidden flex items-center justify-between px-4 py-3 bg-[#0C0F17] text-white border-b border-white/10 sticky top-0 z-20">
+          <button
+            onClick={() => setSidebarOpen(true)}
+            className="flex items-center gap-2 text-xs font-bold text-white bg-white/10 hover:bg-[#F97316] px-3 py-1.5 rounded-lg border border-white/15 transition-colors cursor-pointer"
+          >
+            <svg className="w-4 h-4 text-[#F97316]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+            </svg>
+            <span>Dashboard Menu</span>
+          </button>
+          <div className="flex items-center gap-2">
+            <span className="text-xs font-bold text-[#F97316] uppercase tracking-wider">
+              {NAV_ITEMS.find(n => n.id === tab)?.label}
+            </span>
+          </div>
+        </div>
+
         {/* DB warning banner */}
         {dbError && (
-          <div className="bg-amber-50 border-b border-amber-200 px-6 py-2.5">
+          <div className="bg-amber-50 border-b border-amber-200 px-4 sm:px-6 py-2.5">
             <p className="text-xs text-amber-800 text-center max-w-5xl mx-auto">
               ⚠ <strong>Database offline (Atlas IP whitelist).</strong> {dbError}
             </p>
@@ -424,7 +513,7 @@ export default function AdminPage() {
         )}
 
         {/* Content Container */}
-        <div className="flex-1 max-w-6xl w-full mx-auto px-4 sm:px-8 py-8">
+        <div className="flex-1 max-w-6xl w-full mx-auto px-3 sm:px-8 py-5 sm:py-8">
           {tab === 'images' && <ImageManager products={products} secret={secret} onUpdate={p => setProducts(p)} />}
           {tab === 'folder' && <FolderUpload products={products} secret={secret} onDone={p => setProducts(p)} />}
           {tab === 'add'    && <AddProduct   secret={secret} />}

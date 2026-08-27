@@ -140,13 +140,13 @@ export function LiveHeroSlider({ initialSlides }: { initialSlides?: BannerSlide[
 
   return (
     <section
-      className="relative overflow-hidden bg-[#0A0A0A] select-none text-white"
+      className="relative overflow-hidden bg-[#0F131C] select-none text-white"
       onTouchStart={handleTouchStart}
       onTouchMove={handleTouchMove}
       onTouchEnd={handleTouchEnd}
       aria-label="Promotional Showcase"
     >
-      {/* ── 4K Background Images with Subtle Ken Burns Zoom ── */}
+      {/* ── 4K Background Images with Bright & Vivid Lighting ── */}
       <div className="absolute inset-0 z-0">
         {slides.map((slide, index) => {
           const isActive = index === currentIndex;
@@ -163,17 +163,21 @@ export function LiveHeroSlider({ initialSlides }: { initialSlides?: BannerSlide[
                 fill
                 priority={index === 0}
                 sizes="100vw"
-                className={`object-cover object-center transform transition-transform duration-[8000ms] ease-out ${
+                className={`object-cover object-center brightness-[1.08] contrast-[1.04] transform transition-transform duration-[8000ms] ease-out ${
                   isActive ? 'scale-105' : 'scale-100'
                 }`}
               />
-              {/* Luxury Vignette & Contrast Shading */}
-              <div className="absolute inset-0 bg-gradient-to-r from-[#0A0A0A] via-[#0A0A0A]/90 md:via-[#0A0A0A]/80 to-transparent" />
-              <div className="absolute inset-0 bg-gradient-to-t from-[#0A0A0A] via-[#0A0A0A]/40 to-black/30" />
+              {/* Brighter & Softer Gradient Shading for Maximum Image Clarity */}
+              <div className="absolute inset-0 bg-gradient-to-r from-[#0C101A]/80 via-[#0C101A]/40 md:via-[#0C101A]/25 to-transparent" />
+              <div className="absolute inset-0 bg-gradient-to-t from-[#0C101A]/60 via-transparent to-black/10" />
             </div>
           );
         })}
       </div>
+
+      {/* ── Ambient Radial Glow for High-End Brightness ── */}
+      <div className="absolute top-1/4 left-1/4 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-[#F97316]/12 rounded-full blur-[140px] pointer-events-none z-0" />
+      <div className="absolute bottom-1/4 right-1/4 w-[400px] h-[400px] bg-sky-400/10 rounded-full blur-[130px] pointer-events-none z-0" />
 
       {/* ── Foreground Content & Controls ── */}
       <div className="relative z-10 max-w-[1440px] 2xl:max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8 py-10 sm:py-16 md:py-20 lg:py-24 min-h-[580px] md:min-h-[640px] lg:min-h-[680px] flex flex-col justify-between">
@@ -181,7 +185,7 @@ export function LiveHeroSlider({ initialSlides }: { initialSlides?: BannerSlide[
         {/* Top Meta Bar */}
         <div className="flex items-center justify-between gap-4">
           <div className="flex items-center gap-3">
-            <span className="text-[10px] sm:text-xs font-bold tracking-[0.24em] uppercase text-white/60">
+            <span className="text-[10px] sm:text-xs font-bold tracking-[0.24em] uppercase text-white/80 bg-black/30 backdrop-blur-md px-3 py-1 rounded-full border border-white/10 shadow-sm">
               {current.categoryTag}
             </span>
           </div>
@@ -193,10 +197,10 @@ export function LiveHeroSlider({ initialSlides }: { initialSlides?: BannerSlide[
                 key={slide.id}
                 onClick={() => goToSlide(idx)}
                 aria-label={`Go to slide ${idx + 1}`}
-                className={`h-1.5 rounded-full transition-all duration-300 ${
+                className={`h-2 rounded-full transition-all duration-300 ${
                   idx === currentIndex
-                    ? 'w-6 bg-white'
-                    : 'w-1.5 bg-white/30 hover:bg-white/60'
+                    ? 'w-7 bg-white shadow-md'
+                    : 'w-2 bg-white/40 hover:bg-white/70'
                 }`}
               />
             ))}
@@ -207,11 +211,11 @@ export function LiveHeroSlider({ initialSlides }: { initialSlides?: BannerSlide[
         <div className="max-w-2xl my-auto py-8">
           <h1
             key={`title-${currentIndex}`}
-            className="font-display text-white tracking-tight leading-[1.06] mb-4 text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold animate-fadeIn"
+            className="font-display text-white tracking-tight leading-[1.06] mb-4 text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold animate-fadeIn drop-shadow-[0_2px_16px_rgba(0,0,0,0.65)]"
           >
             {current.title.split(current.titleHighlight)[0]}
             <span
-              className="inline-block"
+              className="inline-block drop-shadow-[0_2px_12px_rgba(0,0,0,0.7)]"
               style={{ color: current.badgeAccent }}
             >
               {current.titleHighlight}
@@ -221,7 +225,7 @@ export function LiveHeroSlider({ initialSlides }: { initialSlides?: BannerSlide[
 
           <p
             key={`desc-${currentIndex}`}
-            className="text-sm sm:text-base md:text-lg text-white/80 leading-relaxed mb-8 max-w-xl animate-fadeIn font-light"
+            className="text-sm sm:text-base md:text-lg text-white/95 leading-relaxed mb-8 max-w-xl animate-fadeIn font-normal drop-shadow-[0_1px_8px_rgba(0,0,0,0.6)]"
             style={{ animationDelay: '100ms' }}
           >
             {current.subtitle}
@@ -231,7 +235,7 @@ export function LiveHeroSlider({ initialSlides }: { initialSlides?: BannerSlide[
           <div className="flex flex-wrap items-center gap-3.5 sm:gap-4">
             <Link
               href={current.primaryCtaLink}
-              className="px-7 sm:px-8 py-3.5 sm:py-4 rounded-full text-sm font-bold shadow-2xl transition-all duration-300 hover:scale-[1.02] active:scale-[0.98] flex items-center gap-2 group bg-white text-[#0A0A0A] hover:bg-white/90"
+              className="px-7 sm:px-8 py-3.5 sm:py-4 rounded-full text-sm font-bold shadow-2xl transition-all duration-300 hover:scale-[1.02] active:scale-[0.98] flex items-center gap-2 group bg-white text-[#0A0A0A] hover:bg-white/95 ring-2 ring-white/20"
             >
               <span>{current.primaryCtaText}</span>
               <svg
