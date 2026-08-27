@@ -806,8 +806,8 @@ function AddProduct({ secret }: { secret: string }) {
           </label>
         </div>
       </div>
-      <button type="submit" disabled={saving || !form.name || !form.price}
-        className="w-full py-3.5 rounded-xl font-bold text-sm disabled:opacity-40"
+      <button type="submit" disabled={saving}
+        className="w-full py-3.5 rounded-xl font-bold text-sm hover:opacity-90 active:scale-[0.99] transition-all cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
         style={{ background: '#0C0C0C', color: '#FFFFFF' }}>
         {saving ? 'Saving…' : 'Add Product'}
       </button>

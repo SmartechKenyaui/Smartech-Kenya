@@ -127,9 +127,9 @@ export default function UploadPage() {
           </div>
         )}
 
-        <button onClick={submit} disabled={!form.name || !form.price || !img}
+        <button onClick={submit}
           style={{ width:'100%', padding:'15px', borderRadius:12, background:'#0C0C0C', color:'#FFFFFF',
-            fontWeight:700, fontSize:15, border:'none', cursor:'pointer', opacity: (!form.name||!form.price||!img) ? 0.4 : 1 }}>
+            fontWeight:700, fontSize:15, border:'none', cursor:'pointer', transition:'opacity 0.2s' }}>
           Upload Product
         </button>
 

@@ -2,7 +2,7 @@
 
 **Author / Maintainer:** Benedict Guthiga  
 **Version:** 2.0.0  
-**Stack:** Next.js 14 (App Router) • TypeScript • Tailwind CSS • Redux Toolkit • Cloudinary Context API • Telegram Bot API  
+**Stack:** Next.js 14 (App Router) • TypeScript • Tailwind CSS • Redux Toolkit • Cloudinary Context API  
 
 ---
 
@@ -12,7 +12,7 @@
 
 Unlike traditional e-commerce web applications that rely on heavy SQL/NoSQL databases with ongoing server maintenance and cold starts, Smartech Kenya utilizes a high-efficiency **Database-less / Headless Media Architecture**. The entire catalog—including product titles, brands, SKUs, pricing, compare discounts, stock levels, categories, specifications, and visibility flags—is stored and indexed directly as **Cloudinary Context Metadata** attached to image assets.
 
-Orders are processed via a streamlined **WhatsApp-first checkout pipeline**, generating structured order manifests sent directly to the sales and dispatch desk (`+254 746 722 417`). In addition, store operators can update catalog imagery on the fly using a dedicated **Telegram Bot Webhook** or the feature-packed web **Admin Portal**.
+Orders are processed via a streamlined **WhatsApp-first checkout pipeline**, generating structured order manifests sent directly to the sales and dispatch desk (`+254 746 722 417`). In addition, store operators can update catalog imagery and products using the feature-packed web **Admin Portal**.
 
 ---
 
@@ -265,8 +265,6 @@ Store staff takes photo of appliance on phone
 | `CLOUDINARY_API_SECRET` | Cloudinary API secret | `0Gk1X0w-wLuGyUCqtOP6VoBdQ8E` |
 | `ADMIN_SECRET` | Secret password for admin access | `Smartech.ke@2026` |
 | `NEXT_PUBLIC_APP_URL` | Application root URL | `https://smartechkenya.co.ke` |
-| `TELEGRAM_BOT_TOKEN` | *(Optional)* Telegram bot authentication token | Optional |
-| `TELEGRAM_OWNER_ID` | *(Optional)* Store owner Telegram chat ID | Optional |
 
 ### Vercel Deployment Checklist
 

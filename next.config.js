@@ -30,12 +30,6 @@ const nextConfig = {
           { key: 'Referrer-Policy',         value: 'strict-origin-when-cross-origin' },
         ],
       },
-      {
-        source: '/api/webhook/:path*',
-        headers: [
-          { key: 'Access-Control-Allow-Origin', value: '*' },
-        ],
-      },
     ];
   },
 };
