@@ -1,4 +1,4 @@
-import type { Metadata } from 'next';
+import type { Metadata, Viewport } from 'next';
 import './globals.css';
 import { Providers } from '@/components/layout/Providers';
 import { Header }    from '@/components/layout/Header';
@@ -8,6 +8,12 @@ import { Toaster }   from 'react-hot-toast';
 const SITE_URL = process.env.NEXT_PUBLIC_APP_URL ?? 'https://smartechkenya.co.ke';
 let metadataBase: URL;
 try { metadataBase = new URL(SITE_URL); } catch { metadataBase = new URL('https://smartechkenya.co.ke'); }
+
+export const viewport: Viewport = {
+  width: 'device-width',
+  initialScale: 1,
+  maximumScale: 5,
+};
 
 export const metadata: Metadata = {
   metadataBase,
