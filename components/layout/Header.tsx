@@ -212,9 +212,9 @@ export function Header() {
         <div className="max-w-[1440px] 2xl:max-w-[1600px] mx-auto px-4 sm:px-6 flex items-center gap-3 sm:gap-4 h-[60px] sm:h-[64px]">
 
           {/* Logo */}
-          <Link href="/" className="shrink-0 flex items-center">
-            <Image src="/logo.png" alt="Smartech Kenya" width={140} height={40} priority
-              className="object-contain h-8 sm:h-9 w-auto"/>
+          <Link href="/" className="shrink-0 flex items-center py-1">
+            <Image src="/logo.png" alt="Smartech Kenya" width={180} height={48} priority
+              className="object-contain h-9 sm:h-11 w-auto max-h-[44px]"/>
           </Link>
 
           {/* Desktop search */}

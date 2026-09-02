@@ -70,7 +70,7 @@ export function Footer() {
           {/* Brand */}
           <div className="sm:col-span-2">
             <Link href="/" className="inline-block mb-5">
-              <Image src="/logo.png" alt="Smartech Kenya" width={140} height={38} className="object-contain"/>
+              <Image src="/logo.png" alt="Smartech Kenya" width={180} height={48} className="object-contain h-9 sm:h-10 w-auto"/>
             </Link>
             <p className="text-gray-600 text-sm leading-relaxed mb-6 max-w-sm font-medium">
               Kenya&apos;s leading tech & home appliance destination. Genuine brand-sealed products with official warranty and rapid Nairobi delivery.
